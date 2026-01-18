@@ -68,7 +68,7 @@
                         <id>default-cli</id>
                         <configuration>
                             <options>
-                                <option>--enable-native-access=javafx.graphics</option>
+                                <option>--enable-native-access=javafx.graphics,org.bytedeco.javacpp,org.bytedeco.ffmpeg</option>
                             </options>
                             <mainClass>com.ahthek/com.ahthek.MainApp</mainClass>
                         </configuration>
