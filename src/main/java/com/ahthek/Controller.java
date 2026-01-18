@@ -73,11 +73,19 @@ public class Controller {
       
       String batPath = edlPath.replace(".edl", ".bat");
       
+      int input_acodec = avcodec.AV_CODEC_ID_AAC, input_vcodec = avcodec.AV_CODEC_ID_H265;
       try (FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(FilenameUtils.removeExtension(edlPath))) {
         grabber.start();
         System.out.println("Audio Codec (ID, Name): " + grabber.getAudioCodec() + ", " + grabber.getAudioCodecName());
         System.out.println("Video Codec (ID, Name): " + grabber.getVideoCodec() + ", " + grabber.getVideoCodecName());
+        input_acodec = grabber.getAudioCodec();
+        input_vcodec = grabber.getVideoCodec();
+        // System.out.println("AV_CODEC_ID_HEVC = " + avcodec.AV_CODEC_ID_HEVC);
+        // System.out.println("AV_CODEC_ID_H265 = " + avcodec.AV_CODEC_ID_H265);
+        // System.out.println("AV_CODEC_ID_H264 = " + avcodec.AV_CODEC_ID_H264);
+        // System.out.println("AV_CODEC_ID_AAC = " + avcodec.AV_CODEC_ID_AAC);
         grabber.stop();
+        grabber.close();
       } catch (FrameGrabber.Exception e) {
         e.printStackTrace();
       }
@@ -99,13 +107,31 @@ public class Controller {
             // each line contains only 2 timestamps which is a start and an end and is separated by 'tab'.
             String[] arr = line.replace(",", ".").split("\t");
 
-            String idx = trimCopyRadioButton.isSelected() ? atoz[count] : String.format("%02d", count);
-            String codec = trimCopyRadioButton.isSelected() ? " -c copy " : " -c:v libx265 -c:a aac ";
+            // String idx = trimCopyRadioButton.isSelected() ? atoz[count] : String.format("%02d", count);
+            // String codec = trimCopyRadioButton.isSelected() ? " -c copy " : " -c:v libx265 -c:a aac ";
+
+            String idx, codec, output_acodec, output_vcodec;
+            if (trimCopyRadioButton.isSelected()) {
+              idx = atoz[count];
+              codec = " -c copy ";
+            } else {
+              idx = String.format("%02d", count);
+              if (input_acodec == avcodec.AV_CODEC_ID_AAC && input_vcodec == avcodec.AV_CODEC_ID_H265) {
+                // if audio is aac and video is hevc/h265, just copy. this is more towards making the
+                // command cleaner. actually the code in else block is enough.
+                codec = " -c copy ";
+              } else {
+                // maybe audio is not aac but video is hevc/h265 and thus only audio need to be converted
+                // OR audio is aac but video is not hevc/h265 and thus only video need to be converted
+                // OR both audio is not aac and video is not hevc/h265 and thus both need to be converted
+                output_acodec = input_acodec == avcodec.AV_CODEC_ID_AAC ? " -c:a copy " : " -c:a aac ";
+                output_vcodec = input_vcodec == avcodec.AV_CODEC_ID_H265 ? " -c:v copy" : " -c:v libx265";
+                codec = output_vcodec + output_acodec;
+              }
+            }
 
             String out = Paths.get(parent, FilenameUtils.removeExtension(videoFileName) + "_" + idx + ".mkv").toString();
 
-            // need to check the audio codec of the file first. if already aac no need convert.
-            // but this one later la
             StringBuilder cmd = new StringBuilder();
             cmd.append("ffmpeg -y -hide_banner -ss ");
             cmd.append(arr[0]);
