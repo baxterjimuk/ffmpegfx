@@ -1,0 +1,28 @@
+# JavaFX Build & Output
+target/
+build/
+
+# VS Code Specific
+.vscode/
+
+# IDE Files (if applicable)
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# OS Generated Files
+.DS_Store
+
+# Dependencies (Maven/Gradle)
+# For Maven:
+lib/
+
+# For Gradle:
+# .gradle/
+# gradlew
+# gradlew.bat
+
+# Logs & Temp Files
+*.log
+*.tmp
