@@ -26,6 +26,9 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import org.bytedeco.ffmpeg.global.avcodec;
+import org.bytedeco.javacv.FFmpegFrameGrabber;
+import org.bytedeco.javacv.FrameGrabber;
 
 import org.apache.commons.io.FilenameUtils;
 
@@ -67,6 +70,17 @@ public class Controller {
       String parent = edlFile.getParent();
       
       String batPath = edlPath.replace(".edl", ".bat");
+      
+      try (FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(FilenameUtils.removeExtension(edlPath))) {
+        grabber.setOption("hide_banner", "1");
+        grabber.setOption("log_level", "quiet");
+        grabber.start();
+        System.out.println("Audio Codec (ID, Name): " + grabber.getAudioCodec() + ", " + grabber.getAudioCodecName());
+        System.out.println("Video Codec (ID, Name): " + grabber.getVideoCodec() + ", " + grabber.getVideoCodecName());
+        grabber.stop();
+      } catch (FrameGrabber.Exception e) {
+        e.printStackTrace();
+      }
 
       Files.deleteIfExists(Paths.get(batPath));
       
@@ -87,6 +101,7 @@ public class Controller {
 
             String idx = trimCopyRadioButton.isSelected() ? atoz[count] : String.format("%02d", count);
             String codec = trimCopyRadioButton.isSelected() ? " -c copy " : " -c:v libx265 -c:a aac ";
+
             String out = Paths.get(parent, FilenameUtils.removeExtension(videoFileName) + "_" + idx + ".mkv").toString();
 
             // need to check the audio codec of the file first. if already aac no need convert.
