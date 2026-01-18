@@ -26,7 +26,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import org.bytedeco.ffmpeg.global.avcodec;
+import org.bytedeco.ffmpeg.global.avcodec; // will need later for constant
+import org.bytedeco.ffmpeg.global.avutil;
 import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.FrameGrabber;
 
@@ -62,6 +63,7 @@ public class Controller {
 
   @FXML
   private void generateBatFile() throws IOException {
+    avutil.av_log_set_level(avutil.AV_LOG_QUIET);
     // loop through each edl file
     for (String edlPath : filePaths) {
       File edlFile = new File(edlPath);
@@ -72,8 +74,6 @@ public class Controller {
       String batPath = edlPath.replace(".edl", ".bat");
       
       try (FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(FilenameUtils.removeExtension(edlPath))) {
-        grabber.setOption("hide_banner", "1");
-        grabber.setOption("loglevel", "quiet");
         grabber.start();
         System.out.println("Audio Codec (ID, Name): " + grabber.getAudioCodec() + ", " + grabber.getAudioCodecName());
         System.out.println("Video Codec (ID, Name): " + grabber.getVideoCodec() + ", " + grabber.getVideoCodecName());
