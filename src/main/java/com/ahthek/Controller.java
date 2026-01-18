@@ -73,7 +73,7 @@ public class Controller {
       
       try (FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(FilenameUtils.removeExtension(edlPath))) {
         grabber.setOption("hide_banner", "1");
-        grabber.setOption("log_level", "quiet");
+        grabber.setOption("loglevel", "quiet");
         grabber.start();
         System.out.println("Audio Codec (ID, Name): " + grabber.getAudioCodec() + ", " + grabber.getAudioCodecName());
         System.out.println("Video Codec (ID, Name): " + grabber.getVideoCodec() + ", " + grabber.getVideoCodecName());
