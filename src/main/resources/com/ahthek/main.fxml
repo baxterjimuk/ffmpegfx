@@ -3,6 +3,9 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.RadioButton?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.ToggleGroup?>
@@ -11,12 +14,12 @@
 <?import javafx.scene.layout.VBox?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="439.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.ahthek.Controller">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="475.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.ahthek.Controller">
    <children>
-      <Label layoutX="14.0" layoutY="14.0" text="EDL file(s) to be processed:" />
-      <ListView fx:id="edlFileListView" layoutX="14.0" layoutY="35.0" prefHeight="200.0" prefWidth="538.0" />
-      <TextArea fx:id="selectedTextArea" editable="false" layoutX="15.0" layoutY="273.0" prefHeight="101.0" prefWidth="538.0" />
-      <VBox alignment="TOP_CENTER" layoutX="549.0" layoutY="35.0" prefHeight="200.0" prefWidth="51.0" spacing="5.0">
+      <Label layoutX="14.0" layoutY="69.0" text="EDL file(s) to be processed:" />
+      <ListView fx:id="edlFileListView" layoutX="14.0" layoutY="90.0" prefHeight="200.0" prefWidth="538.0" />
+      <TextArea fx:id="selectedTextArea" editable="false" layoutX="15.0" layoutY="328.0" prefHeight="101.0" prefWidth="538.0" />
+      <VBox alignment="TOP_CENTER" layoutX="549.0" layoutY="90.0" prefHeight="200.0" prefWidth="51.0" spacing="5.0">
          <children>
             <Button fx:id="selectEdlFileButton" mnemonicParsing="false" onAction="#selectFiles">
                <graphic>
@@ -44,13 +47,22 @@
             </Button>
          </children>
       </VBox>
-      <RadioButton fx:id="trimCopyRadioButton" layoutX="15.0" layoutY="242.0" mnemonicParsing="false" text="Trim-Copy">
+      <RadioButton fx:id="trimCopyRadioButton" layoutX="15.0" layoutY="297.0" mnemonicParsing="false" text="Trim-Copy">
          <toggleGroup>
             <ToggleGroup fx:id="actionGroup" />
          </toggleGroup>
       </RadioButton>
-      <RadioButton fx:id="transcodeRadioButton" layoutX="100.0" layoutY="242.0" mnemonicParsing="false" selected="true" text="Trim &amp; Re-encode" toggleGroup="$actionGroup" />
-      <Button fx:id="startButton" layoutX="502.0" layoutY="242.0" mnemonicParsing="false" onAction="#generateBatFile" text="START" />
-      <Button layoutX="15.0" layoutY="386.0" mnemonicParsing="false" onAction="#switchToBat" text="Switch to BAT" />
+      <RadioButton fx:id="transcodeRadioButton" layoutX="100.0" layoutY="297.0" mnemonicParsing="false" selected="true" text="Trim &amp; Re-encode" toggleGroup="$actionGroup" />
+      <Button fx:id="startButton" layoutX="502.0" layoutY="297.0" mnemonicParsing="false" onAction="#generateBatFile" text="START" />
+      <Button layoutX="15.0" layoutY="441.0" mnemonicParsing="false" onAction="#switchToBat" text="Switch to BAT" visible="false" />
+      <MenuBar layoutX="6.0" layoutY="14.0">
+        <menus>
+          <Menu mnemonicParsing="false" text="Task">
+            <items>
+              <MenuItem mnemonicParsing="false" onAction="#switchToBat" text="Switch to BAT" />
+            </items>
+          </Menu>
+        </menus>
+      </MenuBar>
    </children>
 </AnchorPane>

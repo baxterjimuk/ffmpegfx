@@ -16,6 +16,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.TextArea;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.SelectionMode;
 import javafx.collections.ObservableList;
 import javafx.beans.binding.Bindings;
@@ -30,6 +31,9 @@ import org.bytedeco.ffmpeg.global.avcodec; // will need later for constant
 import org.bytedeco.ffmpeg.global.avutil;
 import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.FrameGrabber;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
+import java.util.Optional;
 
 import org.apache.commons.io.FilenameUtils;
 
@@ -63,97 +67,105 @@ public class Controller {
 
   @FXML
   private void generateBatFile() throws IOException {
-    avutil.av_log_set_level(avutil.AV_LOG_QUIET);
-    // loop through each edl file
-    for (String edlPath : filePaths) {
-      File edlFile = new File(edlPath);
-      String edlFileName = edlFile.getName();
-      String videoFileName = FilenameUtils.getBaseName(edlFileName);
-      String parent = edlFile.getParent();
-      
-      String batPath = edlPath.replace(".edl", ".bat");
-      
-      int input_acodec = avcodec.AV_CODEC_ID_AAC, input_vcodec = avcodec.AV_CODEC_ID_H265;
-      try (FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(FilenameUtils.removeExtension(edlPath))) {
-        grabber.start();
-        System.out.println("Audio Codec (ID, Name): " + grabber.getAudioCodec() + ", " + grabber.getAudioCodecName());
-        System.out.println("Video Codec (ID, Name): " + grabber.getVideoCodec() + ", " + grabber.getVideoCodecName());
-        input_acodec = grabber.getAudioCodec();
-        input_vcodec = grabber.getVideoCodec();
-        // System.out.println("AV_CODEC_ID_HEVC = " + avcodec.AV_CODEC_ID_HEVC);
-        // System.out.println("AV_CODEC_ID_H265 = " + avcodec.AV_CODEC_ID_H265);
-        // System.out.println("AV_CODEC_ID_H264 = " + avcodec.AV_CODEC_ID_H264);
-        // System.out.println("AV_CODEC_ID_AAC = " + avcodec.AV_CODEC_ID_AAC);
-        grabber.stop();
-        grabber.close();
-      } catch (FrameGrabber.Exception e) {
-        e.printStackTrace();
-      }
+    Alert alert = new Alert(AlertType.CONFIRMATION);
+    alert.setTitle("Generate .bat file");
+    // alert.setContentText("something");
+    alert.setHeaderText("Are you sure you want to continue?");
 
-      Files.deleteIfExists(Paths.get(batPath));
-      
-      try (BufferedWriter bw = new BufferedWriter(new FileWriter(batPath, true))) {
-        bw.write("chcp 65001");
-        bw.newLine();
+    Optional<ButtonType> result = alert.showAndWait();
 
-        try (BufferedReader br = new BufferedReader(new FileReader(edlFile))) {
-          int count = 0;
-          String line;
-          while ((line = br.readLine()) != null) {
-            count += 1;
+    if (result.isPresent() && result.get() == ButtonType.OK){
+      avutil.av_log_set_level(avutil.AV_LOG_QUIET);
+      // loop through each edl file
+      for (String edlPath : filePaths) {
+        File edlFile = new File(edlPath);
+        String edlFileName = edlFile.getName();
+        String videoFileName = FilenameUtils.getBaseName(edlFileName);
+        String parent = edlFile.getParent();
+        
+        String batPath = edlPath.replace(".edl", ".bat");
+        
+        int input_acodec = avcodec.AV_CODEC_ID_AAC, input_vcodec = avcodec.AV_CODEC_ID_H265;
+        try (FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(FilenameUtils.removeExtension(edlPath))) {
+          grabber.start();
+          System.out.println(
+            "VIDEO: " + grabber.getVideoCodecName() + " (" + grabber.getVideoCodec() + ")"
+            + "\tAUDIO: " + grabber.getAudioCodecName() + " (" + grabber.getAudioCodec() + ")"
+            + "\t" + videoFileName
+          );
+          input_acodec = grabber.getAudioCodec();
+          input_vcodec = grabber.getVideoCodec();
+          grabber.stop();
+          grabber.close();
+        } catch (FrameGrabber.Exception e) {
+          e.printStackTrace();
+        }
 
-            // for each line in an edl file, the time in miliseconds is written with comma (,)
-            // here we convert it to dot (.) and then convert each line to an array
-            // each line contains only 2 timestamps which is a start and an end and is separated by 'tab'.
-            String[] arr = line.replace(",", ".").split("\t");
+        Files.deleteIfExists(Paths.get(batPath));
+        
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(batPath, true))) {
+          bw.write("chcp 65001");
+          bw.newLine();
 
-            // String idx = trimCopyRadioButton.isSelected() ? atoz[count] : String.format("%02d", count);
-            // String codec = trimCopyRadioButton.isSelected() ? " -c copy " : " -c:v libx265 -c:a aac ";
+          try (BufferedReader br = new BufferedReader(new FileReader(edlFile))) {
+            int count = 0;
+            String line;
+            while ((line = br.readLine()) != null) {
+              count += 1;
 
-            String idx, codec, output_acodec, output_vcodec;
-            if (trimCopyRadioButton.isSelected()) {
-              idx = atoz[count];
-              codec = " -c copy ";
-            } else {
-              idx = String.format("%02d", count);
-              if (input_acodec == avcodec.AV_CODEC_ID_AAC && input_vcodec == avcodec.AV_CODEC_ID_H265) {
-                // if audio is aac and video is hevc/h265, just copy. this is more towards making the
-                // command cleaner. actually the code in else block is enough.
+              // for each line in an edl file, the time in miliseconds is written with comma (,)
+              // here we convert it to dot (.) and then convert each line to an array
+              // each line contains only 2 timestamps which is a start and an end and is separated by 'tab'.
+              String[] arr = line.replace(",", ".").split("\t");
+
+              // String idx = trimCopyRadioButton.isSelected() ? atoz[count] : String.format("%02d", count);
+              // String codec = trimCopyRadioButton.isSelected() ? " -c copy " : " -c:v libx265 -c:a aac ";
+
+              String idx, codec, output_acodec, output_vcodec;
+              if (trimCopyRadioButton.isSelected()) {
+                idx = atoz[count];
                 codec = " -c copy ";
               } else {
-                // maybe audio is not aac but video is hevc/h265 and thus only audio need to be converted
-                // OR audio is aac but video is not hevc/h265 and thus only video need to be converted
-                // OR both audio is not aac and video is not hevc/h265 and thus both need to be converted
-                output_acodec = input_acodec == avcodec.AV_CODEC_ID_AAC ? " -c:a copy " : " -c:a aac ";
-                output_vcodec = input_vcodec == avcodec.AV_CODEC_ID_H265 ? " -c:v copy" : " -c:v libx265";
-                codec = output_vcodec + output_acodec;
+                idx = String.format("%02d", count);
+                if (input_acodec == avcodec.AV_CODEC_ID_AAC && input_vcodec == avcodec.AV_CODEC_ID_H265) {
+                  // if audio is aac and video is hevc/h265, just copy. this is more towards making the
+                  // command cleaner. actually the code in else block is enough.
+                  codec = " -c copy ";
+                } else {
+                  // maybe audio is not aac but video is hevc/h265 and thus only audio need to be converted
+                  // OR audio is aac but video is not hevc/h265 and thus only video need to be converted
+                  // OR both audio is not aac and video is not hevc/h265 and thus both need to be converted
+                  output_acodec = input_acodec == avcodec.AV_CODEC_ID_AAC ? " -c:a copy " : " -c:a aac ";
+                  output_vcodec = input_vcodec == avcodec.AV_CODEC_ID_H265 ? " -c:v copy" : " -c:v libx265";
+                  codec = output_vcodec + output_acodec;
+                }
               }
+
+              String out = Paths.get(parent, FilenameUtils.removeExtension(videoFileName) + "_" + idx + ".mkv").toString();
+
+              StringBuilder cmd = new StringBuilder();
+              cmd.append("ffmpeg -y -hide_banner -ss ");
+              cmd.append(arr[0]);
+              cmd.append(" -to ");
+              cmd.append(arr[1]);
+              cmd.append(" -i ");
+              cmd.append("\"" + FilenameUtils.removeExtension(edlPath) + "\"");
+              cmd.append(codec);
+              cmd.append("\"" + out + "\"");
+
+              bw.write(cmd.toString());
+              bw.newLine();
             }
-
-            String out = Paths.get(parent, FilenameUtils.removeExtension(videoFileName) + "_" + idx + ".mkv").toString();
-
-            StringBuilder cmd = new StringBuilder();
-            cmd.append("ffmpeg -y -hide_banner -ss ");
-            cmd.append(arr[0]);
-            cmd.append(" -to ");
-            cmd.append(arr[1]);
-            cmd.append(" -i ");
-            cmd.append("\"" + FilenameUtils.removeExtension(edlPath) + "\"");
-            cmd.append(codec);
-            cmd.append("\"" + out + "\"");
-
-            bw.write(cmd.toString());
-            bw.newLine();
+          } catch (IOException e) {
+            e.printStackTrace();
           }
+          bw.write("@pause");
         } catch (IOException e) {
           e.printStackTrace();
         }
-        bw.write("@pause");
-      } catch (IOException e) {
-        e.printStackTrace();
       }
+      System.out.println("generateBatFile completed!");
     }
-    System.out.println("generateBatFile completed!");
   }
 
   @FXML
