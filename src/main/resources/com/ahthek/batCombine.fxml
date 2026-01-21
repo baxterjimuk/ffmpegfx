@@ -75,6 +75,7 @@
           <Menu mnemonicParsing="false" text="Task">
             <items>
               <MenuItem mnemonicParsing="false" onAction="#swtichToMain" text="Switch to EDL" />
+                  <MenuItem mnemonicParsing="false" onAction="#switchToUfc" text="Switch to UFC" />
             </items>
           </Menu>
         </menus>

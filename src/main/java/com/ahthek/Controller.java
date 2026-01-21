@@ -60,6 +60,11 @@ public class Controller {
   }
 
   @FXML
+  private void switchToUfc() throws IOException {
+    MainApp.setRoot("ufc");
+  }
+
+  @FXML
   private Button removeEdlFileButton, clearButton, startButton;
 
   @FXML

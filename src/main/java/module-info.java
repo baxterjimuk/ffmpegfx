@@ -8,6 +8,7 @@ module com.ahthek {
     requires org.kordamp.ikonli.fontawesome6;
     requires org.apache.commons.io;
     requires org.bytedeco.ffmpeg;
+    requires java.xml;
     
     opens com.ahthek to javafx.fxml;
     exports com.ahthek;

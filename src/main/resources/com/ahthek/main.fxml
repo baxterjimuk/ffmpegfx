@@ -60,6 +60,7 @@
           <Menu mnemonicParsing="false" text="Task">
             <items>
               <MenuItem mnemonicParsing="false" onAction="#switchToBat" text="Switch to BAT" />
+                  <MenuItem mnemonicParsing="false" onAction="#switchToUfc" text="Switch to UFC" />
             </items>
           </Menu>
         </menus>
