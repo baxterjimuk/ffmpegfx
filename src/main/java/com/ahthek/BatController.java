@@ -46,6 +46,11 @@ public class BatController {
   }
 
   @FXML
+  private void switchToUfc() throws IOException {
+    MainApp.setRoot("ufc");
+  }
+
+  @FXML
   public void initialize() {
     batFileListView.setItems(batPaths);
     batFileListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
