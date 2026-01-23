@@ -8,9 +8,13 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.time.Duration;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -36,7 +40,43 @@ public class Temporary {
   }
 
   public static void main(String[] args) throws IOException {
-    
+    String[][] arr = {
+      {"00:44:37.333", "01:07:49.267"},
+      {"01:15:10.833", "01:37:46.800"},
+      {"01:44:43.433", "02:07:25.400"}
+    };
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss.SSS");
+    // LocalTime start = LocalTime.parse(arr[0][0], formatter);
+    // LocalTime end = LocalTime.parse(arr[0][1], formatter);
+    // Duration duration = Duration.between(start, end);
+    // System.out.println(duration.toString());
+    /* */
+    long[] result = new long[arr.length];
+    long[] hasil = new long[arr.length];
+    long sum = 0;
+    long jumlah = 0;
+    for (int i = 0; i < arr.length; i++) {
+      LocalTime start = LocalTime.parse(arr[i][0], formatter);
+      LocalTime end = LocalTime.parse(arr[i][1], formatter);
+      Duration duration = Duration.between(start, end);
+      // System.out.println(duration.toMillis());
+      long mula = convertDurationToMillis(arr[i][0]);
+      long tamat = convertDurationToMillis(arr[i][1]);
+      long beza = tamat - mula;
+      jumlah += beza;
+      sum += duration.toMillis();
+      result[i] = sum;
+      hasil[i] = jumlah;
+    }
+    for (long val: result) {
+      System.out.print(val + " ");
+    }
+    System.out.println("\n");
+    for (long val: hasil) {
+      System.out.print(val + " ");
+    }
+    // System.out.println(convertDurationToMillis(arr[0][0]));
+    /*
     String mltpath = "C:\\Users\\te\\Downloads\\other transfer\\UFC 302\\UFC 302 Early Prelims.mlt";
     String txtpath = "C:\\Users\\te\\Downloads\\other transfer\\UFC 302\\UFC 302 Early Prelims.txt";
     String chapterpath = "C:\\Users\\te\\Downloads\\other transfer\\UFC 302\\UFC_302_Early_Prelims.ffmetadata";
@@ -176,30 +216,17 @@ public class Temporary {
     } catch (IOException e) {
       e.printStackTrace();
     }
+       */
   }
 }
 
 /*
-;FFMETADATA1
-title=My Video Title
-artist=My Name
-
-[CHAPTER]
-TIMEBASE=1/1000
-START=0
-END=60000
-title=Chapter 1 Title
-
-[CHAPTER]
-TIMEBASE=1/1000
-START=60001
-END=120000
-title=Chapter 2 Title
-
-[CHAPTER]
-TIMEBASE=1/1000
-START=120001
-END=180000
-title=Chapter 3 Title
-
-*/
+ * ;FFMETADATA1 title=My Video Title artist=My Name
+ * 
+ * [CHAPTER] TIMEBASE=1/1000 START=0 END=60000 title=Chapter 1 Title
+ * 
+ * [CHAPTER] TIMEBASE=1/1000 START=60001 END=120000 title=Chapter 2 Title
+ * 
+ * [CHAPTER] TIMEBASE=1/1000 START=120001 END=180000 title=Chapter 3 Title
+ * 
+ */
