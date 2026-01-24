@@ -95,8 +95,12 @@ public class BatController {
     TextField textField
   ) throws IOException {
     DirectoryChooser directoryChooser = new DirectoryChooser();
+    File initialDir = new File(preferences.get(lastUsedDir, System.getProperty("user.home")));
+    if (!initialDir.exists()) {
+      initialDir = new File(System.getProperty("user.home"));
+    }
     directoryChooser.setTitle(title);
-    directoryChooser.setInitialDirectory(new File(preferences.get(lastUsedDir, System.getProperty("user.home"))));
+    directoryChooser.setInitialDirectory(initialDir);
     Stage stage = (Stage)((Node) event.getSource()).getScene().getWindow();
     File selectedFolder = directoryChooser.showDialog(stage);
     if (selectedFolder != null) {
@@ -119,8 +123,12 @@ public class BatController {
   @FXML
   private void selectFiles(ActionEvent event) throws IOException {
     FileChooser fileChooser = new FileChooser();
+    File initialDir = new File(preferences.get("lastUsedDir", System.getProperty("user.home")));
+    if (!initialDir.exists()) {
+      initialDir = new File(System.getProperty("user.home"));
+    }
     fileChooser.setTitle("Select .bat file(s)");
-    fileChooser.setInitialDirectory(new File(preferences.get("lastUsedDir", System.getProperty("user.home"))));;
+    fileChooser.setInitialDirectory(initialDir);
     fileChooser.getExtensionFilters().addAll(
       new ExtensionFilter("All files", "*.*"),
       new ExtensionFilter("Batch files", "*.bat")

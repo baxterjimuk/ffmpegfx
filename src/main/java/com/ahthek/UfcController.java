@@ -22,10 +22,12 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import javafx.beans.binding.BooleanBinding;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.TextField;
@@ -48,6 +50,9 @@ public class UfcController {
 
   @FXML
   private TextField mltFileTextField, txtFileTextField, videoFileTextField;
+
+  @FXML
+  private Button startButton;
 
   ExtensionFilter allFilter = new ExtensionFilter("All files", "*.*");
 
@@ -75,8 +80,12 @@ public class UfcController {
     ActionEvent event, String title, List<ExtensionFilter> filters, ExtensionFilter selectedFilter, TextField textField
   ) throws IOException {
     FileChooser fileChooser = new FileChooser();
+    File initialDir = new File(preferences.get("lastUsedDir", System.getProperty("user.home")));
+    if (!initialDir.exists()) {
+      initialDir = new File(System.getProperty("user.home"));
+    }
     fileChooser.setTitle(title);
-    fileChooser.setInitialDirectory(new File(preferences.get("lastUsedDir", System.getProperty("user.home"))));
+    fileChooser.setInitialDirectory(initialDir);
     fileChooser.getExtensionFilters().addAll(filters);
     fileChooser.setSelectedExtensionFilter(selectedFilter);
     Stage stage = (Stage)((Node) event.getSource()).getScene().getWindow();
@@ -85,6 +94,13 @@ public class UfcController {
       textField.setText(selectedFile.getAbsolutePath());
       preferences.put("lastUsedDir", selectedFile.getParent());
     }
+  }
+
+  public void initialize() {
+    BooleanBinding blankTextFields = videoFileTextField.textProperty().isEmpty()
+    .or(mltFileTextField.textProperty().isEmpty())
+    .or(txtFileTextField.textProperty().isEmpty());
+    startButton.disableProperty().bind(blankTextFields);
   }
 
   public static long convertDurationToMillis(String duration) {
@@ -155,13 +171,13 @@ public class UfcController {
               String start = entryElement.getAttribute("in");
               String end = entryElement.getAttribute("out");
               StringBuilder sb = new StringBuilder();
-              sb.append("ffmpeg -y -hide_banner -loglevel quiet -stats -ss ");
+              sb.append("ffmpeg -y -hide_banner -loglevel warning -stats -ss ");
               sb.append(start);
               sb.append(" -to ");
               sb.append(end);
               sb.append(" -i ");
               sb.append("\"" + Paths.get("..", videoFileName).toString() + "\"");
-              sb.append(" -c:v libx265 -c:a aac ");
+              sb.append(" -c:v libx265 -x265-params log-level=error -c:a aac ");
               sb.append("\"" + tempOutputName + "\"");
               cmdWriter.write(sb.toString());
               cmdWriter.newLine();
@@ -181,7 +197,7 @@ public class UfcController {
           }
         }
         StringBuilder sb = new StringBuilder();
-        sb.append("ffmpeg -y -hide_banner -loglevel quiet -stats -f concat -safe 0 -i ");
+        sb.append("ffmpeg -y -hide_banner -loglevel warning -stats -f concat -safe 0 -i ");
         sb.append("\"" + txtPath.getFileName().toString() + "\"");
         sb.append(" -i ");
         sb.append("\"" + ffmetadataPath.getFileName().toString() + "\"");

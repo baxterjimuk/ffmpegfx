@@ -126,30 +126,31 @@ public class Controller {
               // String idx = trimCopyRadioButton.isSelected() ? atoz[count] : String.format("%02d", count);
               // String codec = trimCopyRadioButton.isSelected() ? " -c copy " : " -c:v libx265 -c:a aac ";
 
-              String idx, codec, output_acodec, output_vcodec;
+              String idx, codec;
               if (trimCopyRadioButton.isSelected()) {
                 idx = atoz[count];
                 codec = " -c copy ";
               } else {
                 idx = String.format("%02d", count);
+                // even if user decides to not trim-copy, the input could actually already in h265/hevc
+                // and aac audio. in this case we perform the same thing as trim-copy.
                 if (input_acodec == avcodec.AV_CODEC_ID_AAC && input_vcodec == avcodec.AV_CODEC_ID_H265) {
-                  // if audio is aac and video is hevc/h265, just copy. this is more towards making the
-                  // command cleaner. actually the code in else block is enough.
                   codec = " -c copy ";
                 } else {
-                  // maybe audio is not aac but video is hevc/h265 and thus only audio need to be converted
-                  // OR audio is aac but video is not hevc/h265 and thus only video need to be converted
-                  // OR both audio is not aac and video is not hevc/h265 and thus both need to be converted
-                  output_acodec = input_acodec == avcodec.AV_CODEC_ID_AAC ? " -c:a copy " : " -c:a aac ";
-                  output_vcodec = input_vcodec == avcodec.AV_CODEC_ID_H265 ? " -c:v copy" : " -c:v libx265";
-                  codec = output_vcodec + output_acodec;
+                  // however, if the input video is anything other than h265/hevc, then we convert it
+                  // to that. in this case, the audio is also needed to be encoded because in some
+                  // previous cases, just copying the audio while the video is being encoded will result
+                  // in some blank/black scene with audio in the beginning of the resulting output even 
+                  // though based on research it shouldn't be like that because audio doesn't have a 
+                  // concept of keyframes and thus should be able to be trimmed from anywhere unlike video.
+                  codec = " -c:v libx265 -x265-params log-level=error -c:a aac ";
                 }
               }
 
               String out = Paths.get(parent, FilenameUtils.removeExtension(videoFileName) + "_" + idx + ".mkv").toString();
 
               StringBuilder cmd = new StringBuilder();
-              cmd.append("ffmpeg -y -hide_banner -ss ");
+              cmd.append("ffmpeg -y -hide_banner -loglevel warning -stats -ss ");
               cmd.append(arr[0]);
               cmd.append(" -to ");
               cmd.append(arr[1]);
@@ -199,8 +200,12 @@ public class Controller {
   @FXML
   private void selectFiles(ActionEvent event) throws IOException {
     FileChooser fileChooser = new FileChooser();
+    File initialDir = new File(preferences.get("lastUsedDir", System.getProperty("user.home")));
+    if (!initialDir.exists()) {
+      initialDir = new File(System.getProperty("user.home"));
+    }
     fileChooser.setTitle("Select .edl File(s)");
-    fileChooser.setInitialDirectory(new File(preferences.get("lastUsedDir", System.getProperty("user.home"))));
+    fileChooser.setInitialDirectory(initialDir);
     fileChooser.getExtensionFilters().addAll(new ExtensionFilter("All files", "*.*"),
         new ExtensionFilter("EDL files", "*.edl"));
     Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();

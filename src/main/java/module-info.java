@@ -9,6 +9,7 @@ module com.ahthek {
     requires org.apache.commons.io;
     requires org.bytedeco.ffmpeg;
     requires java.xml;
+    requires java.net.http;
     
     opens com.ahthek to javafx.fxml;
     exports com.ahthek;
