@@ -53,7 +53,10 @@
          </toggleGroup>
       </RadioButton>
       <RadioButton fx:id="transcodeRadioButton" layoutX="100.0" layoutY="297.0" mnemonicParsing="false" selected="true" text="Trim &amp; Re-encode" toggleGroup="$actionGroup" />
-      <Button fx:id="startButton" layoutX="502.0" layoutY="297.0" mnemonicParsing="false" onAction="#generateBatFile" text="START" />
+      <Button fx:id="startButton" layoutX="489.0" layoutY="293.0" mnemonicParsing="false" onAction="#generateBatFile" text="START">
+         <graphic>
+            <FontIcon iconLiteral="fas-play" />
+         </graphic></Button>
       <Button layoutX="15.0" layoutY="441.0" mnemonicParsing="false" onAction="#switchToBat" text="Switch to BAT" visible="false" />
       <MenuBar layoutX="6.0" layoutY="14.0">
         <menus>

@@ -37,7 +37,10 @@
             <FontIcon iconLiteral="fas-folder" />
          </graphic>
       </Button>
-      <Button layoutX="501.0" layoutY="232.0" mnemonicParsing="false" onAction="#generateFiles" text="START" />
+      <Button fx:id="startButton" layoutX="501.0" layoutY="232.0" mnemonicParsing="false" onAction="#generateFiles" text="START">
+         <graphic>
+            <FontIcon iconLiteral="fas-play" />
+         </graphic></Button>
       <TableView fx:id="chapterTableView" layoutX="132.0" layoutY="290.0" prefHeight="86.0" prefWidth="225.0" visible="false">
         <columns>
           <TableColumn fx:id="startTableColumn" editable="false" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="-1.0" sortable="false" text="Start" />
