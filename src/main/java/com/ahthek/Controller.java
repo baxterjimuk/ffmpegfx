@@ -25,6 +25,9 @@ import javafx.collections.ListChangeListener;
 import java.util.stream.Collectors;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.Duration;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import org.bytedeco.ffmpeg.global.avcodec; // will need later for constant
@@ -33,6 +36,7 @@ import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.FrameGrabber;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
+
 import java.util.Optional;
 
 import org.apache.commons.io.FilenameUtils;
@@ -45,6 +49,22 @@ public class Controller {
   // start with 0 so that if we want to call 'B', we can use atoz[2] instead of atoz[1]
   // in other words, 'B' is the number 2 letter in the list of alphabet
   String[] atoz = ("0ABCDEFGHIJKLMNOPQRSTUVWXYZ").split("");
+
+  public static String formatDuration(String start, String end) {
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss.SSS");
+    Duration duration = Duration.between(
+      LocalTime.parse(start, formatter), 
+      LocalTime.parse(end, formatter)
+    );
+      long millis = duration.toMillis();
+
+      long hours = millis / (1000 * 60 * 60);
+      long minutes = (millis / (1000 * 60)) % 60;
+      long seconds = (millis / 1000) % 60;
+      long ms = millis % 1000;
+
+      return String.format("%02d:%02d:%02d.%03d", hours, minutes, seconds, ms);
+  }
 
   @FXML
   private ListView<String> edlFileListView;
@@ -109,7 +129,9 @@ public class Controller {
         Files.deleteIfExists(Paths.get(batPath));
         
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(batPath, true))) {
-          bw.write("chcp 65001");
+          bw.write("@chcp 65001");
+          bw.newLine();
+          bw.write("@echo.");
           bw.newLine();
 
           try (BufferedReader br = new BufferedReader(new FileReader(edlFile))) {
@@ -123,9 +145,6 @@ public class Controller {
               // each line contains only 2 timestamps which is a start and an end and is separated by 'tab'.
               String[] arr = line.replace(",", ".").split("\t");
 
-              // String idx = trimCopyRadioButton.isSelected() ? atoz[count] : String.format("%02d", count);
-              // String codec = trimCopyRadioButton.isSelected() ? " -c copy " : " -c:v libx265 -c:a aac ";
-
               String idx, codec;
               if (trimCopyRadioButton.isSelected()) {
                 idx = atoz[count];
@@ -137,20 +156,24 @@ public class Controller {
                 if (input_acodec == avcodec.AV_CODEC_ID_AAC && input_vcodec == avcodec.AV_CODEC_ID_H265) {
                   codec = " -c copy ";
                 } else {
-                  // however, if the input video is anything other than h265/hevc, then we convert it
-                  // to that. in this case, the audio is also needed to be encoded because in some
-                  // previous cases, just copying the audio while the video is being encoded will result
-                  // in some blank/black scene with audio in the beginning of the resulting output even 
-                  // though based on research it shouldn't be like that because audio doesn't have a 
-                  // concept of keyframes and thus should be able to be trimmed from anywhere unlike video.
                   codec = " -c:v libx265 -x265-params log-level=error -c:a aac ";
                 }
               }
 
+              // just transcode to mkv always since we're going to re-encode both video and audio if
+              // we're not doing any sort of trim-copy. mp4 while has no black/blank frame being inserted
+              // at the beginning of output with copied audio, it tends to not seek friendly (choppy seeking).
+              // mkv has also served use well all these while without much playback issue. if anything such as
+              // only trimming at keyframes and not exact timestamp etc, can always perform another re-transcode.
               String out = Paths.get(parent, FilenameUtils.removeExtension(videoFileName) + "_" + idx + ".mkv").toString();
 
               StringBuilder cmd = new StringBuilder();
-              cmd.append("ffmpeg -y -hide_banner -loglevel warning -stats -ss ");
+              cmd.append("@echo [");
+              cmd.append(codec.equals(" -c copy ") ? "copying " : "transcoding ");
+              cmd.append(formatDuration(arr[0], arr[1]) + "] ");
+              cmd.append(FilenameUtils.getName(out));
+              cmd.append(System.lineSeparator());
+              cmd.append("@ffmpeg -y -hide_banner -loglevel warning -stats -ss ");
               cmd.append(arr[0]);
               cmd.append(" -to ");
               cmd.append(arr[1]);
@@ -158,6 +181,8 @@ public class Controller {
               cmd.append("\"" + FilenameUtils.removeExtension(edlPath) + "\"");
               cmd.append(codec);
               cmd.append("\"" + out + "\"");
+              cmd.append(System.lineSeparator());
+              cmd.append("@echo.");
 
               bw.write(cmd.toString());
               bw.newLine();
