@@ -86,6 +86,11 @@ public class Controller {
   }
 
   @FXML
+  private void switchToMove() throws IOException {
+    MainApp.setRoot("move");
+  }
+
+  @FXML
   private Button removeEdlFileButton, clearButton, startButton;
 
   @FXML

@@ -171,6 +171,11 @@ public class BatController {
   }
 
   @FXML
+  private void switchToMove() throws IOException {
+    MainApp.setRoot("move");
+  }
+
+  @FXML
   public void initialize() {
     batFileListView.setItems(batPaths);
     batFileListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);

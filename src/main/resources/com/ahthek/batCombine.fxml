@@ -80,6 +80,7 @@
         <menus>
           <Menu mnemonicParsing="false" text="Task">
             <items>
+                  <MenuItem mnemonicParsing="false" onAction="#switchToMove" text="Switch to MOVE" />
               <MenuItem mnemonicParsing="false" onAction="#swtichToMain" text="Switch to EDL" />
                   <MenuItem mnemonicParsing="false" onAction="#switchToUfc" text="Switch to UFC" />
             </items>
