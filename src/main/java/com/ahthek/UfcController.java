@@ -31,6 +31,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
@@ -124,13 +125,16 @@ public class UfcController {
   @FXML
   private void generateFiles() throws IOException {
     Alert alert = new Alert(AlertType.CONFIRMATION);
-    alert.setTitle("Generate files");
+    Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+    stage.getIcons().add(new Image("clapfx.png"));
+    alert.setTitle("FFMPEGFX");
     alert.setContentText("This will generate the following files:\n"
       + "1. A .bat file containing ffmpeg commands\n"
       + "2. A .txt file containing the list of temporary output to be joined\n"
-      + "3. A .ffmetadata chapter file"
+      + "3. A .ffmetadata chapter file\n\n"
+      + "Are you sure you want to continue?"
     );
-    alert.setHeaderText("Are you sure you want to continue?");
+    alert.setHeaderText("Generate files");
 
     Optional<ButtonType> result = alert.showAndWait();
     if (result.isPresent() && result.get() == ButtonType.OK) {
@@ -156,6 +160,7 @@ public class UfcController {
         doc.getDocumentElement().normalize();
         Element root = doc.getDocumentElement();
         NodeList playlistNodeList = root.getElementsByTagName("playlist");
+        StringBuilder sb = new StringBuilder();
         for (int i = 0; i < playlistNodeList.getLength(); i++) {
           if (playlistNodeList.item(i).getAttributes().getNamedItem("id").getNodeValue().equals("playlist0")) {
             NodeList entryNodeList = ((Element) playlistNodeList.item(i)).getElementsByTagName("entry");
@@ -170,7 +175,7 @@ public class UfcController {
               Element entryElement = (Element) entryNodeList.item(j);
               String start = entryElement.getAttribute("in");
               String end = entryElement.getAttribute("out");
-              StringBuilder sb = new StringBuilder();
+              sb.setLength(0);
               sb.append("ffmpeg -y -hide_banner -loglevel warning -stats -ss ");
               sb.append(start);
               sb.append(" -to ");
@@ -196,7 +201,7 @@ public class UfcController {
             }
           }
         }
-        StringBuilder sb = new StringBuilder();
+        sb.setLength(0);
         sb.append("ffmpeg -y -hide_banner -loglevel warning -stats -f concat -safe 0 -i ");
         sb.append("\"" + txtPath.getFileName().toString() + "\"");
         sb.append(" -i ");
@@ -213,7 +218,17 @@ public class UfcController {
         Files.write(shPath, cmdlines, StandardCharsets.UTF_8);
         shPath.toFile().setExecutable(true, false);
 
-        System.out.println("generateFiles completed!");
+        sb.setLength(0);
+        sb.append(cmdPath.toString() 
+          + "\n" + shPath.toString()
+          + "\n" + txtPath.toString()
+          + "\n" + ffmetadataPath.toString()
+        );
+        System.out.println("generateFiles completed!" + "\n" + sb.toString());
+        alert.setAlertType(AlertType.INFORMATION);
+        alert.setHeaderText("Process completed!");
+        alert.setContentText("The following files have been generated:\n" + sb.toString());
+        alert.showAndWait();
       } catch (ParserConfigurationException e) {
         e.printStackTrace();
       } catch (SAXException e) {
@@ -222,3 +237,4 @@ public class UfcController {
     }
   }
 }
+// last thing done is involving stringbuilder
