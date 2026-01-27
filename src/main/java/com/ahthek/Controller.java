@@ -17,6 +17,7 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.image.Image;
 import javafx.scene.control.SelectionMode;
 import javafx.collections.ObservableList;
 import javafx.beans.binding.Bindings;
@@ -92,10 +93,13 @@ public class Controller {
 
   @FXML
   private void generateBatFile() throws IOException {
+    StringBuilder cmd = new StringBuilder();
     Alert alert = new Alert(AlertType.CONFIRMATION);
-    alert.setTitle("Generate .bat file");
-    // alert.setContentText("something");
-    alert.setHeaderText("Are you sure you want to continue?");
+    Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+    stage.getIcons().add(new Image("clapfx.png"));
+    alert.setTitle("FFMPEGFX");
+    alert.setHeaderText("Generate batch (.bat) file(s)");
+    alert.setContentText("Are you sure you want to continue?");
 
     Optional<ButtonType> result = alert.showAndWait();
 
@@ -113,11 +117,11 @@ public class Controller {
         int input_acodec = avcodec.AV_CODEC_ID_AAC, input_vcodec = avcodec.AV_CODEC_ID_H265;
         try (FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(FilenameUtils.removeExtension(edlPath))) {
           grabber.start();
-          System.out.println(
+          /* System.out.println(
             "VIDEO: " + grabber.getVideoCodecName() + " (" + grabber.getVideoCodec() + ")"
             + "\tAUDIO: " + grabber.getAudioCodecName() + " (" + grabber.getAudioCodec() + ")"
             + "\t" + videoFileName
-          );
+          ); */
           input_acodec = grabber.getAudioCodec();
           input_vcodec = grabber.getVideoCodec();
           grabber.stop();
@@ -167,7 +171,7 @@ public class Controller {
               // only trimming at keyframes and not exact timestamp etc, can always perform another re-transcode.
               String out = Paths.get(parent, FilenameUtils.removeExtension(videoFileName) + "_" + idx + ".mkv").toString();
 
-              StringBuilder cmd = new StringBuilder();
+              cmd.setLength(0);
               cmd.append("@echo [");
               cmd.append(codec.equals(" -c copy ") ? "copying " : "transcoding ");
               cmd.append(formatDuration(arr[0], arr[1]) + "] ");
@@ -191,11 +195,14 @@ public class Controller {
             e.printStackTrace();
           }
           bw.write("@pause");
+          System.out.println(batPath + " generated!");
         } catch (IOException e) {
           e.printStackTrace();
         }
       }
-      System.out.println("generateBatFile completed!");
+      alert.setAlertType(AlertType.INFORMATION);
+      alert.setContentText("Process completed!");
+      alert.showAndWait();
     }
   }
 
@@ -242,8 +249,6 @@ public class Controller {
         }
       }
       preferences.put("lastUsedDir", selectedFiles.getLast().getParent());
-    } else {
-      System.out.println("No file selected.");
     }
   }
 

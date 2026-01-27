@@ -38,6 +38,7 @@ import javafx.scene.Node;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.Border;
 import javafx.scene.layout.BorderStroke;
@@ -78,15 +79,18 @@ public class BatController {
   @FXML
   private void generateCombinedBat() throws IOException {
     Alert alert = new Alert(AlertType.CONFIRMATION);
-    alert.setTitle("Combine .bat file");
+    Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+    stage.getIcons().add(new Image("clapfx.png"));
+    alert.setTitle("FFMPEGFX");
     alert.setContentText("This will combine the selected .bat file(s) into one(1) .bat file.\n"
       + "Do not combine Trim-Copy .bat file(s) with Trim & Re-encode .bat file(s).\n"
       + "Please make sure the selected .bat file(s) either belong to\n"
       + "Trim-Copy only OR Trim & Re-encode only and not both.\n"
       + "If that is not the case, please do not proceed and\n"
-      + "make the necessary amendment before trying again."
+      + "make the necessary amendment before trying again.\n\n"
+      + "Are you sure you want to continue?"
     );
-    alert.setHeaderText("Are you sure you want to continue?");
+    alert.setHeaderText("Combine batch (.bat) file(s)");
 
     Optional<ButtonType> result = alert.showAndWait();
     if (result.isPresent() && result.get() == ButtonType.OK) {
@@ -133,7 +137,10 @@ public class BatController {
         } else {
           bw.write("@pause");
         }
-        System.out.println(cmdPath.toString() + " done!");
+        System.out.println(cmdPath.toString() + " generated!");
+        alert.setAlertType(AlertType.INFORMATION);
+        alert.setContentText(cmdPath.toString() + " generated!");
+        alert.showAndWait();
       }
     }
   }
@@ -141,7 +148,7 @@ public class BatController {
   private String shutdownCmd(long timeout) {
     String ls = System.lineSeparator();
     StringBuilder sb = new StringBuilder();
-    sb.append("@echo off" + ls + "shutdown /s /t ");
+    sb.append("@echo off" + ls + "echo." + ls + "shutdown /s /t ");
     sb.append(String.valueOf(timeout));
     sb.append(ls + "echo Would you like to abort the shutdown?");
     sb.append(ls + "choice /t 9999 /c yn /d n /m \"PLEASE DECIDE NOW!!!\"");
