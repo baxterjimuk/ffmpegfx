@@ -98,8 +98,10 @@ public class BatController {
           File batFile = new File(batPath);
           List<String> cmdList = Files.readAllLines(batFile.toPath());
           for (String cmd: cmdList) {
-            if (!Arrays.asList("@chcp", "chcp", "@pause", "pause").stream().anyMatch(cmd::startsWith)) {
+            if (!Arrays.asList("@chcp", "chcp", "@pause", "pause", "@echo.").stream().anyMatch(cmd::startsWith)) {
               if (cmd.startsWith("@echo")) {
+                bw.write("@echo.");
+                bw.newLine();
                 bw.write(cmd);
               } else {
                 // cmd is ffmpeg command. for now let's just do placing all output into 1 same
@@ -108,8 +110,6 @@ public class BatController {
                 if (putInFolderCheckBox.isSelected()) {
                   String folderString = putInFolderTextField.getText();
                   if (folderString.isBlank()) {
-                    // should disable the START button if user checks the box but has not
-                    // select a folder to save all the output to
                     bw.write(cmd);
                   } else {
                     List<String> inOut = quotedStrings(cmd);
@@ -124,23 +124,25 @@ public class BatController {
                 }
               }
               bw.newLine();
-              bw.newLine();
-
-              // TO-do only if user check to include shutdown
-              bw.append(shutdownCmd("1800"));
             }
           }
         }
-        bw.write("@pause");
+        if (shutdownCheckBox.isSelected()) {
+          bw.newLine();
+          bw.write(shutdownCmd(durationInSeconds()));
+        } else {
+          bw.write("@pause");
+        }
+        System.out.println(cmdPath.toString() + " done!");
       }
     }
   }
 
-  private String shutdownCmd(String timeout) {
+  private String shutdownCmd(long timeout) {
     String ls = System.lineSeparator();
     StringBuilder sb = new StringBuilder();
     sb.append("@echo off" + ls + "shutdown /s /t ");
-    sb.append(timeout);
+    sb.append(String.valueOf(timeout));
     sb.append(ls + "echo Would you like to abort the shutdown?");
     sb.append(ls + "choice /t 9999 /c yn /d n /m \"PLEASE DECIDE NOW!!!\"");
     sb.append(ls + "if %errorlevel% equ 1 goto CONTINUE");
@@ -217,13 +219,37 @@ public class BatController {
     });
   }
 
-  @FXML
-  private void normalizeDuration() throws IOException {
+  private void numericalizeSpinner() {
+    String dval = dSpinner.getEditor().getText();
+    String hval = hSpinner.getEditor().getText();
+    String mval = mSpinner.getEditor().getText();
+    String sval = sSpinner.getEditor().getText();
+    if (dval.isBlank() || dval.matches(".*\\D.*")) {
+      dSpinner.getValueFactory().setValue(0);
+    }
+    if (hval.isBlank() || hval.matches(".*\\D.*")) {
+      hSpinner.getValueFactory().setValue(0);
+    }
+    if (mval.isBlank() || mval.matches(".*\\D.*")) {
+      mSpinner.getValueFactory().setValue(0);
+    }
+    if (sval.isBlank() || sval.matches(".*\\D.*")) {
+      sSpinner.getValueFactory().setValue(0);
+    }
+  }
+
+  private long durationInSeconds() {
+    numericalizeSpinner();
     int dval = dSpinner.getValue();
     int hval = hSpinner.getValue();
     int mval = mSpinner.getValue();
     int sval = sSpinner.getValue();
-    Duration duration = Duration.ofSeconds(dval * 24 * 3600 + hval * 3600 + mval * 60 + sval);
+    return dval * 24 * 3600 + hval * 3600 + mval * 60 + sval;
+  }
+
+  @FXML
+  private void normalizeDuration() throws IOException {
+    Duration duration = Duration.ofSeconds(durationInSeconds());
     dSpinner.getValueFactory().setValue((int) duration.toDaysPart());
     hSpinner.getValueFactory().setValue(duration.toHoursPart());
     mSpinner.getValueFactory().setValue(duration.toMinutesPart());
