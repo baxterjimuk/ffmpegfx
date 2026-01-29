@@ -19,6 +19,7 @@
             <items>
               <MenuItem mnemonicParsing="false" onAction="#swtichToMain" text="Switch to EDL" />
                   <MenuItem mnemonicParsing="false" onAction="#switchToBat" text="Switch to BAT" />
+                  <MenuItem mnemonicParsing="false" onAction="#switchToMove" text="Switch to MOVE" />
             </items>
           </Menu>
         </menus>

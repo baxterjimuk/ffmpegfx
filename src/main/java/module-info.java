@@ -10,6 +10,8 @@ module com.ahthek {
     requires org.bytedeco.ffmpeg;
     requires java.xml;
     requires java.net.http;
+    requires transitive javafx.base;
+    requires transitive javafx.graphics;
     
     opens com.ahthek to javafx.fxml;
     exports com.ahthek;

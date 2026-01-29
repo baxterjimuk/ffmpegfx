@@ -50,6 +50,11 @@ public class UfcController {
   }
 
   @FXML
+  private void switchToMove() throws IOException {
+    MainApp.setRoot("move");
+  }
+
+  @FXML
   private TextField mltFileTextField, txtFileTextField, videoFileTextField;
 
   @FXML

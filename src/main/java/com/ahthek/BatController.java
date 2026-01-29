@@ -171,6 +171,11 @@ public class BatController {
   }
 
   @FXML
+  private void switchToMove() throws IOException {
+    MainApp.setRoot("move");
+  }
+
+  @FXML
   public void initialize() {
     batFileListView.setItems(batPaths);
     batFileListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
@@ -354,6 +359,7 @@ public class BatController {
       new ExtensionFilter("All files", "*.*"),
       new ExtensionFilter("Batch files", "*.bat")
     );
+    fileChooser.setSelectedExtensionFilter(new ExtensionFilter("Batch files", "*.bat"));
     Stage stage = (Stage)((Node) event.getSource()).getScene().getWindow();
     List<File> selectedBat = fileChooser.showOpenMultipleDialog(stage);
     if (selectedBat != null) {
