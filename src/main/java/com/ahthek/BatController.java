@@ -72,7 +72,7 @@ public class BatController {
   private TextField putInFolderTextField, combinedNameTextField, batchFileFolderTextField;
 
   @FXML
-  private Button allFolderButton, clearButton, removeButton, startButton, normalizeButton;
+  private Button allFolderButton, clearButton, removeButton, startButton, normalizeButton, resetButton;
 
   private ObservableList<String> batPaths = FXCollections.observableArrayList();
 
@@ -161,21 +161,6 @@ public class BatController {
   }
 
   @FXML
-  private void swtichToMain() throws IOException {
-    MainApp.setRoot("main");
-  }
-
-  @FXML
-  private void switchToUfc() throws IOException {
-    MainApp.setRoot("ufc");
-  }
-
-  @FXML
-  private void switchToMove() throws IOException {
-    MainApp.setRoot("move");
-  }
-
-  @FXML
   public void initialize() {
     batFileListView.setItems(batPaths);
     batFileListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
@@ -229,6 +214,11 @@ public class BatController {
         sSpinner.decrement();
       }
     });
+
+    resetButton.visibleProperty().bind(shutdownCheckBox.selectedProperty());
+    normalizeButton.visibleProperty().bind(shutdownCheckBox.selectedProperty());
+    durationLabel.visibleProperty().bind(shutdownCheckBox.selectedProperty());
+    durationHBox.visibleProperty().bind(shutdownCheckBox.selectedProperty());
   }
 
   private void numericalizeSpinner() {

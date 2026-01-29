@@ -26,10 +26,8 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
-import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.RadioButton;
@@ -73,9 +71,6 @@ public class Move {
 
   @FXML
   private Label batSampleLabel;
-
-  @FXML
-  private CheckBox darkCheckBox;
   
   @FXML
   private void generateBatFile() throws IOException {
@@ -101,34 +96,7 @@ public class Move {
       }
     }
   }
-
-  @FXML
-  private void switchToBat() throws IOException {
-    MainApp.setRoot("batCombine");
-  }
-
-  @FXML
-  private void switchToUfc() throws IOException {
-    MainApp.setRoot("ufc");
-  }
-
-  @FXML
-  private void swtichToMain() throws IOException {
-    MainApp.setRoot("main");
-  }
-
-  @FXML
-  private void darkMode(ActionEvent event) {
-    darkCheckBox.selectedProperty().addListener((obs, wasSelected, isSelected) -> {
-      Scene scene = ((Node) event.getSource()).getScene();
-      if (isSelected) {
-        scene.getStylesheets().add("style.css");
-      } else {
-        scene.getStylesheets().remove("style.css");
-      }
-    });
-  }
-
+  
   @FXML
   private void selectFiles(ActionEvent event) throws IOException {
     FileChooser fileChooser = new FileChooser();
