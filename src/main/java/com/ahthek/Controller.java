@@ -108,7 +108,7 @@ public class Controller {
 
     Optional<ButtonType> result = alert.showAndWait();
 
-    if (result.isPresent() && result.get() == ButtonType.OK){
+    if (result.isPresent() && result.get() == ButtonType.OK) {
       avutil.av_log_set_level(avutil.AV_LOG_QUIET);
       // loop through each edl file
       for (String edlPath : filePaths) {
@@ -234,6 +234,9 @@ public class Controller {
     edlFileListView.getSelectionModel().clearSelection();
   }
 
+  ExtensionFilter allFilter = new ExtensionFilter("All files", "*.*");
+  ExtensionFilter edlFilter = new ExtensionFilter("EDL files", "*.edl");
+
   @FXML
   private void selectFiles(ActionEvent event) throws IOException {
     FileChooser fileChooser = new FileChooser();
@@ -243,8 +246,8 @@ public class Controller {
     }
     fileChooser.setTitle("Select .edl File(s)");
     fileChooser.setInitialDirectory(initialDir);
-    fileChooser.getExtensionFilters().addAll(new ExtensionFilter("All files", "*.*"),
-        new ExtensionFilter("EDL files", "*.edl"));
+    fileChooser.getExtensionFilters().addAll(allFilter, edlFilter);
+    fileChooser.setSelectedExtensionFilter(edlFilter);
     Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
     List<File> selectedFiles = fileChooser.showOpenMultipleDialog(stage);
     if (selectedFiles != null) {

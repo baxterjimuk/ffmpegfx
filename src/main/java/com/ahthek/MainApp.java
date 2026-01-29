@@ -15,6 +15,7 @@ public class MainApp extends Application {
   @Override
   public void start(Stage stage) throws IOException {
     scene = new Scene(loadFXML("move"), 640, 640);
+    // scene.getStylesheets().add("style.css");
     stage.setScene(scene);
     
     stage.setTitle("FFMPEGFX");
