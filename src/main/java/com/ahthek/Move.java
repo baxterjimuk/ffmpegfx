@@ -202,7 +202,7 @@ public class Move {
     System.out.println("this is moveTrim()");
     StringBuilder sb = new StringBuilder();
     now = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
-    Path doPath = Paths.get(batchFileFolderTextField.getText(), now + "-move-full-do.bat");
+    Path doPath = Paths.get(batchFileFolderTextField.getText(), now + "-move-trim.bat");
     
     try (
       BufferedWriter doWriter = new BufferedWriter(new FileWriter(doPath.toString(), true));
@@ -316,7 +316,7 @@ public class Move {
         File edlFile = new File(edlPath);
         File videoFile = new File(edlPath.replace(".edl", ""));
         String videoFileBaseName = FilenameUtils.getBaseName(videoFile.getName());
-        Path newFolder = Paths.get(edlFile.getParent(), videoFileBaseName);
+        // Path newFolder = Paths.get(edlFile.getParent(), videoFileBaseName);
 
         /* Path edlTarget = Paths.get(newFolder.toString(), edlFile.getName());
         Path videoTarget = Paths.get(newFolder.toString(), videoFile.getName());
@@ -328,19 +328,21 @@ public class Move {
         Files.move(edlFile.toPath(), edlTarget, StandardCopyOption.REPLACE_EXISTING);
         Files.move(videoFile.toPath(), videoTarget, StandardCopyOption.REPLACE_EXISTING); */
         
-        if (!Files.isDirectory(newFolder)) {
-          doWriter.newLine();
-          doWriter.write("mkdir \"" + newFolder.toString() + "\"");
-        }
         doWriter.newLine();
-        moveWriter(doWriter, edlPath, newFolder.toString());
+        doWriter.write("cd /d \"" + edlFile.getParent() + "\"");
         doWriter.newLine();
-        moveWriter(doWriter, videoFile.getAbsolutePath(), newFolder.toString());
+        doWriter.write("if not exist \".\\" + videoFileBaseName + "\\\" mkdir \"" + videoFileBaseName + "\"");
+        doWriter.newLine();
+        moveWriter(doWriter, edlFile.getName(), ".\\" + videoFileBaseName + "\\");
+        doWriter.newLine();
+        moveWriter(doWriter, videoFile.getName(), ".\\" + videoFileBaseName + "\\");
 
         undoWriter.newLine();
-        moveWriter(undoWriter, Paths.get(newFolder.toString()) + "\\*.*", edlFile.getParent());
+        undoWriter.write("cd /d \"" + edlFile.getParent() + "\"");
         undoWriter.newLine();
-        undoWriter.write("rmdir \"" + newFolder.toString() + "\"");
+        moveWriter(undoWriter, ".\\" + videoFileBaseName + "\\*.*", ".");
+        undoWriter.newLine();
+        undoWriter.write("rmdir \".\\" + videoFileBaseName + "\"");
       }
       doWriter.newLine();
       doWriter.write("pause");
