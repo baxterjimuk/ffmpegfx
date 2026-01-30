@@ -5,9 +5,6 @@
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
-<?import javafx.scene.control.Menu?>
-<?import javafx.scene.control.MenuBar?>
-<?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.Spinner?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.Tooltip?>
@@ -16,11 +13,11 @@
 <?import javafx.scene.layout.VBox?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="562.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.ahthek.BatController">
+<AnchorPane fx:id="batCombineAP" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.ahthek.BatController">
    <children>
-      <Label layoutX="14.0" layoutY="57.0" text="Combine the following batch (.bat) file:" />
-      <ListView fx:id="batFileListView" layoutX="14.0" layoutY="74.0" prefHeight="200.0" prefWidth="535.0" />
-      <VBox alignment="TOP_CENTER" layoutX="554.0" layoutY="74.0" prefHeight="200.0" prefWidth="40.0" spacing="5.0">
+      <Label layoutX="14.0" layoutY="14.0" text="Combine the following batch (.bat) file:" />
+      <ListView fx:id="batFileListView" layoutX="14.0" layoutY="31.0" prefHeight="200.0" prefWidth="548.0" />
+      <VBox alignment="TOP_CENTER" layoutX="562.0" layoutY="31.0" prefHeight="200.0" prefWidth="43.0" spacing="5.0">
          <children>
             <Button fx:id="addButton" mnemonicParsing="false" onAction="#selectFiles">
                <graphic>
@@ -48,15 +45,15 @@
             </Button>
          </children>
       </VBox>
-      <CheckBox fx:id="putInFolderCheckBox" layoutX="14.0" layoutY="283.0" mnemonicParsing="false" text="Place all resulting file into the following folder (otherwise placed in source file location)" />
-      <TextField fx:id="putInFolderTextField" disable="true" editable="false" layoutX="14.0" layoutY="309.0" prefHeight="25.0" prefWidth="535.0" />
-      <Button fx:id="allFolderButton" disable="true" layoutX="561.0" layoutY="310.0" mnemonicParsing="false" onAction="#selectFileFolder">
+      <CheckBox fx:id="putInFolderCheckBox" layoutX="14.0" layoutY="245.0" mnemonicParsing="false" text="Place all resulting file into the following folder (otherwise placed in source file location)" />
+      <TextField fx:id="putInFolderTextField" disable="true" editable="false" layoutX="14.0" layoutY="262.0" prefHeight="25.0" prefWidth="548.0" />
+      <Button fx:id="allFolderButton" disable="true" layoutX="569.0" layoutY="263.0" mnemonicParsing="false" onAction="#selectFileFolder">
          <graphic>
             <FontIcon iconLiteral="fas-folder-open" />
          </graphic>
       </Button>
-      <TextField fx:id="combinedNameTextField" layoutX="14.0" layoutY="343.0" prefHeight="25.0" prefWidth="535.0" promptText="Enter the file name for the combined batch file (without the '.bat' extension)" />
-      <Button fx:id="combinedNameButton" layoutX="561.0" layoutY="344.0" mnemonicParsing="false" onAction="#generateCombinedName">
+      <TextField fx:id="combinedNameTextField" layoutX="14.0" layoutY="295.0" prefHeight="25.0" prefWidth="548.0" promptText="Enter the file name for the combined batch file (without the '.bat' extension)" />
+      <Button fx:id="combinedNameButton" layoutX="570.0" layoutY="296.0" mnemonicParsing="false" onAction="#generateCombinedName">
          <graphic>
             <FontIcon iconLiteral="fas-random" />
          </graphic>
@@ -64,30 +61,18 @@
             <Tooltip text="Generate for me!" />
          </tooltip>
       </Button>
-      <Label layoutX="14.0" layoutY="378.0" text="Save the combined batch file into the following folder:" />
-      <TextField fx:id="batchFileFolderTextField" editable="false" layoutX="14.0" layoutY="395.0" prefHeight="25.0" prefWidth="535.0" />
-      <Button fx:id="batchFileFolderButton" layoutX="561.0" layoutY="396.0" mnemonicParsing="false" onAction="#selectCombinedFolder">
+      <Label layoutX="14.0" layoutY="337.0" text="Save the combined batch file into the following folder:" />
+      <TextField fx:id="batchFileFolderTextField" editable="false" layoutX="14.0" layoutY="354.0" prefHeight="25.0" prefWidth="548.0" />
+      <Button fx:id="batchFileFolderButton" layoutX="569.0" layoutY="354.0" mnemonicParsing="false" onAction="#selectCombinedFolder">
          <graphic>
             <FontIcon iconLiteral="fas-folder-open" />
          </graphic>
       </Button>
-      <Button fx:id="startButton" layoutX="530.0" layoutY="501.0" mnemonicParsing="false" onAction="#generateCombinedBat" text="START">
+      <Button fx:id="startButton" layoutX="538.0" layoutY="442.0" mnemonicParsing="false" onAction="#generateCombinedBat" text="START">
          <graphic>
             <FontIcon iconLiteral="fas-play" />
          </graphic></Button>
-      <Button layoutX="76.0" layoutY="427.0" mnemonicParsing="false" onAction="#swtichToMain" text="Switch to EDL" visible="false" />
-      <MenuBar layoutX="14.0" layoutY="14.0">
-        <menus>
-          <Menu mnemonicParsing="false" text="Task">
-            <items>
-                  <MenuItem mnemonicParsing="false" onAction="#switchToMove" text="Switch to MOVE" />
-              <MenuItem mnemonicParsing="false" onAction="#swtichToMain" text="Switch to EDL" />
-                  <MenuItem mnemonicParsing="false" onAction="#switchToUfc" text="Switch to UFC" />
-            </items>
-          </Menu>
-        </menus>
-      </MenuBar>
-      <HBox fx:id="durationHBox" alignment="CENTER" layoutX="18.0" layoutY="492.0" prefHeight="42.0" prefWidth="259.0">
+      <HBox fx:id="durationHBox" alignment="CENTER" layoutX="14.0" layoutY="433.0" prefHeight="42.0" prefWidth="259.0">
          <children>
             <VBox alignment="CENTER" prefHeight="60.0" prefWidth="100.0">
                <children>
@@ -118,9 +103,9 @@
             <Insets />
          </opaqueInsets>
       </HBox>
-      <CheckBox fx:id="shutdownCheckBox" layoutX="14.0" layoutY="431.0" mnemonicParsing="false" text="Include 'Shutdown' command to the end of the combined batch file?" />
-      <Label fx:id="durationLabel" layoutX="18.0" layoutY="459.0" text="How long does it take after all tasks are completed before system shutdown?" />
-      <Button fx:id="normalizeButton" layoutX="300.0" layoutY="501.0" mnemonicParsing="false" onAction="#normalizeDuration" text="Normalize" />
-      <Button fx:id="resetButton" layoutX="373.0" layoutY="501.0" mnemonicParsing="false" onAction="#resetDuration" text="Reset" />
+      <CheckBox fx:id="shutdownCheckBox" layoutX="14.0" layoutY="391.0" mnemonicParsing="false" text="Include 'Shutdown' command to the end of the combined batch file" />
+      <Label fx:id="durationLabel" layoutX="14.0" layoutY="414.0" text="How long does it take after all tasks are completed before system shutdown?" />
+      <Button fx:id="normalizeButton" layoutX="288.0" layoutY="442.0" mnemonicParsing="false" onAction="#normalizeDuration" text="Normalize" />
+      <Button fx:id="resetButton" layoutX="377.0" layoutY="442.0" mnemonicParsing="false" onAction="#resetDuration" text="Reset" />
    </children>
 </AnchorPane>

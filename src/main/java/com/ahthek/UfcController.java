@@ -40,21 +40,6 @@ public class UfcController {
   Preferences preferences = Preferences.userNodeForPackage(UfcController.class);
 
   @FXML
-  private void switchToBat() throws IOException {
-    MainApp.setRoot("batCombine");
-  }
-
-  @FXML
-  private void swtichToMain() throws IOException {
-    MainApp.setRoot("main");
-  }
-
-  @FXML
-  private void switchToMove() throws IOException {
-    MainApp.setRoot("move");
-  }
-
-  @FXML
   private TextField mltFileTextField, txtFileTextField, videoFileTextField;
 
   @FXML

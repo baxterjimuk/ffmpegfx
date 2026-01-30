@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<BorderPane fx:id="borderPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.ahthek.LayoutController">
+   <top>
+      <HBox BorderPane.alignment="CENTER">
+         <children>
+            <MenuBar HBox.hgrow="ALWAYS">
+              <menus>
+                <Menu mnemonicParsing="false" text="Task">
+                  <items>
+                    <MenuItem fx:id="edlToBat" disable="true" mnemonicParsing="false" onAction="#edlToBat" text="EDL to BAT" />
+                        <MenuItem fx:id="batCombine" mnemonicParsing="false" onAction="#batCombine" text="BAT Combine" />
+                        <MenuItem fx:id="move" mnemonicParsing="false" onAction="#move" text="Move" />
+                        <MenuItem fx:id="ufc" mnemonicParsing="false" onAction="#ufc" text="UFC" />
+                  </items>
+                </Menu>
+              </menus>
+            </MenuBar>
+            <ToggleButton fx:id="toggle" mnemonicParsing="false" onAction="#darkMode">
+               <graphic>
+                  <FontIcon fx:id="cssIcon" iconLiteral="fas-sun" />
+               </graphic>
+            </ToggleButton>
+         </children>
+      </HBox>
+   </top>
+   <center>
+      <fx:include source="main.fxml" BorderPane.alignment="TOP_LEFT" />
+   </center>
+</BorderPane>

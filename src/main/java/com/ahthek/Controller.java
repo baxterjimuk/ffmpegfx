@@ -76,21 +76,6 @@ public class Controller {
   private TextArea selectedTextArea;
 
   @FXML
-  private void switchToBat() throws IOException {
-    MainApp.setRoot("batCombine");
-  }
-
-  @FXML
-  private void switchToUfc() throws IOException {
-    MainApp.setRoot("ufc");
-  }
-
-  @FXML
-  private void switchToMove() throws IOException {
-    MainApp.setRoot("move");
-  }
-
-  @FXML
   private Button removeEdlFileButton, clearButton, startButton;
 
   @FXML

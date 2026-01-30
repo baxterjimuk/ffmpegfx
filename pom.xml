@@ -70,7 +70,7 @@
                             <options>
                                 <option>--enable-native-access=javafx.graphics,org.bytedeco.javacpp,org.bytedeco.ffmpeg</option>
                             </options>
-                            <mainClass>com.ahthek/com.ahthek.MainApp</mainClass>
+                            <mainClass>com.ahthek/com.ahthek.LayoutController</mainClass>
                         </configuration>
                     </execution>
                     <execution>
@@ -82,7 +82,7 @@
                                 <option>
                                     -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=localhost:8000</option>
                             </options>
-                            <mainClass>com.ahthek.MainApp</mainClass>
+                            <mainClass>com.ahthek.LayoutController</mainClass>
                         </configuration>
                     </execution>
                     <execution>
@@ -93,7 +93,7 @@
                                 <option>
                                     -agentlib:jdwp=transport=dt_socket,server=n,address=${jpda.address}</option>
                             </options>
-                            <mainClass>com.ahthek.MainApp</mainClass>
+                            <mainClass>com.ahthek.LayoutController</mainClass>
                         </configuration>
                     </execution>
                 </executions>
