@@ -2,19 +2,25 @@ package com.ahthek;
 
 import java.io.IOException;
 
+import org.kordamp.ikonli.javafx.FontIcon;
+
 import javafx.application.Application;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 
 public class LayoutController extends Application {
+  private boolean isDarkMode = true;
   @FXML
   private BorderPane borderPane;
 
@@ -23,6 +29,12 @@ public class LayoutController extends Application {
 
   @FXML
   private MenuItem edlToBat, batCombine, move, ufc;
+
+  @FXML
+  private ToggleButton toggle;
+
+  @FXML
+  private FontIcon cssIcon;
 
   @FXML
   private void edlToBat() throws IOException {
@@ -68,13 +80,27 @@ public class LayoutController extends Application {
     ufc.setDisable(false);
   }
 
+  @FXML
+  private void darkMode(ActionEvent event) throws IOException {
+    Node sourceNode = (Node) event.getSource();
+    Scene scene = sourceNode.getScene();
+    if (isDarkMode) {
+        cssIcon.setIconLiteral("fas-moon");
+        scene.getStylesheets().remove("style.css");
+      } else {
+        cssIcon.setIconLiteral("fas-sun");
+        scene.getStylesheets().add("style.css");
+      }
+      isDarkMode = !isDarkMode;
+  }
+
   private static Scene scene;
 
   @Override
   public void start(Stage stage) throws IOException {
-
     scene = new Scene(loadFXML("layout"), 640, 640);
-    // scene.getStylesheets().add("style.css");
+    scene.getStylesheets().add("style.css");
+    
     stage.setScene(scene);
     stage.setResizable(false);
     stage.setTitle("FFMPEGFX");

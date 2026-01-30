@@ -16,7 +16,7 @@
               <menus>
                 <Menu mnemonicParsing="false" text="Task">
                   <items>
-                    <MenuItem fx:id="edlToBat" mnemonicParsing="false" onAction="#edlToBat" text="EDL to BAT" />
+                    <MenuItem fx:id="edlToBat" disable="true" mnemonicParsing="false" onAction="#edlToBat" text="EDL to BAT" />
                         <MenuItem fx:id="batCombine" mnemonicParsing="false" onAction="#batCombine" text="BAT Combine" />
                         <MenuItem fx:id="move" mnemonicParsing="false" onAction="#move" text="Move" />
                         <MenuItem fx:id="ufc" mnemonicParsing="false" onAction="#ufc" text="UFC" />
@@ -24,12 +24,15 @@
                 </Menu>
               </menus>
             </MenuBar>
-            <ToggleButton fx:id="toggle" mnemonicParsing="false">
+            <ToggleButton fx:id="toggle" mnemonicParsing="false" onAction="#darkMode">
                <graphic>
-                  <FontIcon fx:id="cssIcon" />
+                  <FontIcon fx:id="cssIcon" iconLiteral="fas-sun" />
                </graphic>
             </ToggleButton>
          </children>
       </HBox>
    </top>
+   <center>
+      <fx:include source="main.fxml" BorderPane.alignment="TOP_LEFT" />
+   </center>
 </BorderPane>
