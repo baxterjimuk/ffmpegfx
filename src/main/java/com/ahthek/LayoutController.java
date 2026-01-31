@@ -114,7 +114,7 @@ public class LayoutController extends Application {
   }
 
   private static Parent loadFXML(String fxml) throws IOException {
-    FXMLLoader fxmlLoader = new FXMLLoader(MainApp.class.getResource(fxml + ".fxml"));
+    FXMLLoader fxmlLoader = new FXMLLoader(LayoutController.class.getResource(fxml + ".fxml"));
     return fxmlLoader.load();
   }
 

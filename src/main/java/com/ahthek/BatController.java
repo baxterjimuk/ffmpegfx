@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.prefs.Preferences;
 import java.util.regex.Matcher;
@@ -22,6 +23,7 @@ import java.util.Optional;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -60,7 +62,7 @@ public class BatController {
   private CheckBox putInFolderCheckBox, moveCheckBox, shutdownCheckBox;
 
   @FXML
-  private Label durationLabel;
+  private Label durationLabel, estimateLabel;
 
   @FXML
   private HBox durationHBox;
@@ -75,6 +77,8 @@ public class BatController {
   private Button allFolderButton, clearButton, removeButton, startButton, normalizeButton, resetButton;
 
   private ObservableList<String> batPaths = FXCollections.observableArrayList();
+
+  DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss.SSS");
 
   @FXML
   private void generateCombinedBat() throws IOException {
@@ -97,6 +101,12 @@ public class BatController {
       Path cmdPath = Paths.get(batchFileFolderTextField.getText(), combinedNameTextField.getText() + ".bat");
       try (BufferedWriter bw = new BufferedWriter(new FileWriter(cmdPath.toString(), true))) {
         bw.write("@chcp 65001");
+        bw.newLine();
+        bw.write("@echo [%date% %time%] Process started.");
+        bw.newLine();
+        bw.write("@echo Assuming 1s is used to process 1s of video, the whole process will take"
+          + " ~ " + estimateLabel.getText() + " to complete starting from the time above."
+        );
         bw.newLine();
         for (String batPath: batPaths) {
           File batFile = new File(batPath);
@@ -219,6 +229,38 @@ public class BatController {
     normalizeButton.visibleProperty().bind(shutdownCheckBox.selectedProperty());
     durationLabel.visibleProperty().bind(shutdownCheckBox.selectedProperty());
     durationHBox.visibleProperty().bind(shutdownCheckBox.selectedProperty());
+
+    batPaths.addListener((ListChangeListener<String>) change -> {
+      long totalMillis = 0;
+      for (String batPath: batPaths) {
+        File batFile = new File(batPath);
+        try {
+          List<String> cmdList = Files.readAllLines(batFile.toPath());
+          for (String cmd: cmdList) {
+            if (cmd.startsWith("@ffmpeg")) {
+              List<String> startEnd = timeStrings(cmd);
+              Duration duration = Duration.between(
+                LocalTime.parse(startEnd.get(0), formatter), 
+                LocalTime.parse(startEnd.get(1), formatter)
+              );
+              totalMillis += duration.toMillis();
+            }
+          }
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
+      }
+      Duration totalDuration = Duration.ofMillis(totalMillis);
+      if (totalMillis > 0) {
+        estimateLabel.setText(String.valueOf(totalDuration.toDaysPart()) + " days "
+        + String.valueOf(totalDuration.toHoursPart()) + " hours "
+        + String.valueOf(totalDuration.toMinutesPart()) + " minutes "
+        + String.valueOf(totalDuration.toSecondsPart()) + " seconds");
+      }
+      if (batPaths.size() == 0) {
+        estimateLabel.setText(null);
+      }
+    });
   }
 
   private void numericalizeSpinner() {
@@ -300,6 +342,16 @@ public class BatController {
     List<String> result = new ArrayList<>();
     while(matcher.find()) {
       result.add(matcher.group(1));
+    }
+    return result;
+  }
+
+  private static List<String> timeStrings(String text) {
+    Pattern pattern = Pattern.compile("\\d{2}:\\d{2}:\\d{2}\\.\\d{3}");
+    Matcher matcher = pattern.matcher(text);
+    List<String> result = new ArrayList<>();
+    while(matcher.find()) {
+      result.add(matcher.group(0));
     }
     return result;
   }

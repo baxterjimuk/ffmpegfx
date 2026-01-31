@@ -107,5 +107,6 @@
       <Label fx:id="durationLabel" layoutX="14.0" layoutY="414.0" text="How long does it take after all tasks are completed before system shutdown?" />
       <Button fx:id="normalizeButton" layoutX="288.0" layoutY="442.0" mnemonicParsing="false" onAction="#normalizeDuration" text="Normalize" />
       <Button fx:id="resetButton" layoutX="377.0" layoutY="442.0" mnemonicParsing="false" onAction="#resetDuration" text="Reset" />
+      <Label fx:id="estimateLabel" layoutX="324.0" layoutY="14.0" />
    </children>
 </AnchorPane>
