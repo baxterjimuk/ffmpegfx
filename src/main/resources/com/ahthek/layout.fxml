@@ -20,6 +20,7 @@
                         <MenuItem fx:id="batCombine" mnemonicParsing="false" onAction="#batCombine" text="BAT Combine" />
                         <MenuItem fx:id="move" mnemonicParsing="false" onAction="#move" text="Move" />
                         <MenuItem fx:id="ufc" mnemonicParsing="false" onAction="#ufc" text="UFC" />
+                        <MenuItem fx:id="chapter" mnemonicParsing="false" onAction="#chapter" text="Chapter" />
                   </items>
                 </Menu>
               </menus>

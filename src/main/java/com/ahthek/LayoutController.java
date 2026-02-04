@@ -1,6 +1,7 @@
 package com.ahthek;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 import org.kordamp.ikonli.javafx.FontIcon;
 
@@ -15,7 +16,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.image.Image;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 
@@ -25,10 +25,7 @@ public class LayoutController extends Application {
   private BorderPane borderPane;
 
   @FXML
-  private AnchorPane batCombineAP, mainAP, moveAP, ufcAP;
-
-  @FXML
-  private MenuItem edlToBat, batCombine, move, ufc;
+  private MenuItem edlToBat, batCombine, move, ufc, chapter;
 
   @FXML
   private ToggleButton toggle;
@@ -36,48 +33,37 @@ public class LayoutController extends Application {
   @FXML
   private FontIcon cssIcon;
 
-  @FXML
-  private void edlToBat() throws IOException {
-    Parent newCenter = FXMLLoader.load(getClass().getResource("main.fxml"));
+  private void setCenter(String fxml, MenuItem menuItem) throws IOException {
+    Parent newCenter = FXMLLoader.load(getClass().getResource(fxml + ".fxml"));
     borderPane.setCenter(newCenter);
     BorderPane.setAlignment(newCenter, Pos.TOP_LEFT);
-    edlToBat.setDisable(true);
-    batCombine.setDisable(false);
-    move.setDisable(false);
-    ufc.setDisable(false);
+    Arrays.asList(edlToBat, batCombine, move, ufc, chapter)
+    .forEach(item -> item.setDisable(item.equals(menuItem)));
+  }
+
+  @FXML
+  private void chapter() throws IOException {
+    setCenter("chapter", chapter);
+  }
+
+  @FXML
+  private void edlToBat() throws IOException {
+    setCenter("main", edlToBat);
   }
 
   @FXML
   private void batCombine() throws IOException {
-    Parent newCenter = FXMLLoader.load(getClass().getResource("batCombine.fxml"));
-    borderPane.setCenter(newCenter);
-    BorderPane.setAlignment(newCenter, Pos.TOP_LEFT);
-    edlToBat.setDisable(false);
-    batCombine.setDisable(true);
-    move.setDisable(false);
-    ufc.setDisable(false);
+    setCenter("batCombine", batCombine);
   }
 
   @FXML
   private void ufc() throws IOException {
-    Parent newCenter = FXMLLoader.load(getClass().getResource("ufc.fxml"));
-    borderPane.setCenter(newCenter);
-    BorderPane.setAlignment(newCenter, Pos.TOP_LEFT);
-    edlToBat.setDisable(false);
-    batCombine.setDisable(false);
-    move.setDisable(false);
-    ufc.setDisable(true);
+    setCenter("ufc", ufc);
   }
 
   @FXML
   private void move() throws IOException {
-    Parent newCenter = FXMLLoader.load(getClass().getResource("move.fxml"));
-    borderPane.setCenter(newCenter);
-    BorderPane.setAlignment(newCenter, Pos.TOP_LEFT);
-    edlToBat.setDisable(false);
-    batCombine.setDisable(false);
-    move.setDisable(true);
-    ufc.setDisable(false);
+    setCenter("move", move);
   }
 
   @FXML
