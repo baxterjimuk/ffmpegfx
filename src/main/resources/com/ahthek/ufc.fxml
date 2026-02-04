@@ -51,19 +51,19 @@
       <ListView fx:id="batFileListView" layoutX="14.0" layoutY="204.0" prefHeight="86.0" prefWidth="537.0" />
       <VBox alignment="TOP_CENTER" layoutX="555.0" layoutY="204.0" prefHeight="98.0" prefWidth="35.0" spacing="10.0">
          <children>
-            <Button fx:id="moveUpButton" mnemonicParsing="false">
+            <Button fx:id="moveUpButton" mnemonicParsing="false" onAction="#moveUp">
                <graphic>
                   <FontIcon iconLiteral="fas-caret-up" />
                </graphic>
             </Button>
-            <Button fx:id="moveDownButton" mnemonicParsing="false">
+            <Button fx:id="moveDownButton" mnemonicParsing="false" onAction="#moveDown">
                <graphic>
                   <FontIcon iconLiteral="fas-caret-down" />
                </graphic>
             </Button>
          </children>
       </VBox>
-      <Button fx:id="combineButton" layoutX="486.0" layoutY="302.0" mnemonicParsing="false" text="Combine" onAction="#combine" />
+      <Button fx:id="combineButton" layoutX="486.0" layoutY="302.0" mnemonicParsing="false" onAction="#combine" text="Combine" />
       <HBox layoutX="14.0" layoutY="299.0" prefHeight="32.0" prefWidth="200.0" spacing="10.0">
          <children>
             <Button fx:id="addButton" mnemonicParsing="false" onAction="#selectFiles">

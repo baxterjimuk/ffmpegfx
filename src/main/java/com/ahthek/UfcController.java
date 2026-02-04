@@ -289,6 +289,48 @@ public class UfcController {
   }
 
   @FXML
+  private void moveUp() {
+    ObservableList<Integer> selectedIndices = batFileListView.getSelectionModel().getSelectedIndices();
+    if (selectedIndices.isEmpty()) return;
+
+    ObservableList<Integer> indicesCopy = FXCollections.observableArrayList(selectedIndices);
+    FXCollections.sort(indicesCopy); // ascending
+
+    // If any selected item is at the top, do nothing
+    if (indicesCopy.get(0) == 0) return;
+
+    for (int index : indicesCopy) {
+        String current = batPaths.get(index);
+        batPaths.set(index, batPaths.get(index - 1));
+        batPaths.set(index - 1, current);
+
+        batFileListView.getSelectionModel().clearSelection(index);
+        batFileListView.getSelectionModel().select(index - 1);
+    }
+  }
+
+  @FXML
+  private void moveDown() {
+    ObservableList<Integer> selectedIndices = batFileListView.getSelectionModel().getSelectedIndices();
+    if (selectedIndices.isEmpty()) return;
+
+    ObservableList<Integer> indicesCopy = FXCollections.observableArrayList(selectedIndices);
+    FXCollections.sort(indicesCopy, (a, b) -> b - a); // descending
+
+    // If any selected item is at the bottom, do nothing
+    if (indicesCopy.get(0) == batPaths.size() - 1) return;
+
+    for (int index : indicesCopy) {
+        String current = batPaths.get(index);
+        batPaths.set(index, batPaths.get(index + 1));
+        batPaths.set(index + 1, current);
+
+        batFileListView.getSelectionModel().clearSelection(index);
+        batFileListView.getSelectionModel().select(index + 1);
+    }
+  }
+
+  @FXML
   private void clearFiles() throws IOException {
     batPaths.clear();
   }
