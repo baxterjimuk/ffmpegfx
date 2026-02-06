@@ -54,6 +54,7 @@ import javafx.scene.control.ButtonType;
 
 public class BatController {
   Preferences preferences = Preferences.userNodeForPackage(BatController.class);
+  int totalJob;
 
   @FXML
   private ListView<String> batFileListView;
@@ -74,7 +75,7 @@ public class BatController {
   private TextField putInFolderTextField, combinedNameTextField, batchFileFolderTextField;
 
   @FXML
-  private Button allFolderButton, clearButton, removeButton, startButton, normalizeButton, resetButton;
+  private Button allFolderButton, clearButton, removeButton, startButton, normalizeButton, resetButton, moveUpButton, moveDownButton;
 
   private ObservableList<String> batPaths = FXCollections.observableArrayList();
 
@@ -108,6 +109,10 @@ public class BatController {
           + " ~ " + estimateLabel.getText() + " to complete starting from the time above."
         );
         bw.newLine();
+        int jobCount = 0;
+        String totalJobStr = String.valueOf(totalJob);
+        int width = totalJobStr.length();
+        String numberFormat = "%0" + width + "d";
         for (String batPath: batPaths) {
           File batFile = new File(batPath);
           List<String> cmdList = Files.readAllLines(batFile.toPath());
@@ -116,7 +121,12 @@ public class BatController {
               if (cmd.startsWith("@echo")) {
                 bw.write("@echo.");
                 bw.newLine();
-                bw.write(cmd);
+                jobCount++;
+                int bracketIndex = cmd.indexOf("[");
+                StringBuilder sb = new StringBuilder(cmd);
+                sb.insert(bracketIndex, "(" + String.format(numberFormat, jobCount) + "/" + totalJobStr + ") ");
+                bw.write(sb.toString());
+                // bw.write(cmd); // this is the [transcoding HH:mm:ss.SSS] line
               } else {
                 // cmd is ffmpeg command. for now let's just do placing all output into 1 same
                 // destination like the old way. or if the user does not select that option,
@@ -184,60 +194,41 @@ public class BatController {
     .or(putInFolderCheckBox.selectedProperty().and(putInFolderTextField.textProperty().isEmpty())
     );
     startButton.disableProperty().bind(disableStart);
+    Arrays.asList(moveUpButton, moveDownButton).forEach(button -> {
+      button.disableProperty().bind(Bindings.size(batPaths).lessThan(2)
+      .or(Bindings.isEmpty(batFileListView.getSelectionModel().getSelectedItems())));
+    });
 
     durationHBox.setBorder(new Border(new BorderStroke(
       Color.BLACK, BorderStrokeStyle.SOLID, null, new BorderWidths(2)
     )));
-    dSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 999));
-    dSpinner.getEditor().setAlignment(Pos.CENTER_RIGHT);
-    dSpinner.setOnScroll(event -> {
-      if (event.getDeltaY() > 0) {
-        dSpinner.increment();
-      } else if (event.getDeltaY() < 0) {
-        dSpinner.decrement();
-      }
-    });
-    hSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 999));
-    hSpinner.getEditor().setAlignment(Pos.CENTER_RIGHT);
-    hSpinner.setOnScroll(event -> {
-      if (event.getDeltaY() > 0) {
-        hSpinner.increment();
-      } else if (event.getDeltaY() < 0) {
-        hSpinner.decrement();
-      }
-    });
-    mSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 999));
-    mSpinner.getEditor().setAlignment(Pos.CENTER_RIGHT);
-    mSpinner.setOnScroll(event -> {
-      if (event.getDeltaY() > 0) {
-        mSpinner.increment();
-      } else if (event.getDeltaY() < 0) {
-        mSpinner.decrement();
-      }
-    });
-    sSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 999));
-    sSpinner.getEditor().setAlignment(Pos.CENTER_RIGHT);
-    sSpinner.setOnScroll(event -> {
-      if (event.getDeltaY() > 0) {
-        sSpinner.increment();
-      } else if (event.getDeltaY() < 0) {
-        sSpinner.decrement();
-      }
+
+    Arrays.asList(dSpinner, hSpinner, mSpinner, sSpinner).forEach(spinner -> {
+      spinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 999));
+      spinner.getEditor().setAlignment(Pos.CENTER_RIGHT);
+      spinner.setOnScroll(event -> {
+        if (event.getDeltaY() > 0) {
+          spinner.increment();
+        } else if (event.getDeltaY() < 0) {
+          spinner.decrement();
+        }
+      });
     });
 
-    resetButton.visibleProperty().bind(shutdownCheckBox.selectedProperty());
-    normalizeButton.visibleProperty().bind(shutdownCheckBox.selectedProperty());
-    durationLabel.visibleProperty().bind(shutdownCheckBox.selectedProperty());
-    durationHBox.visibleProperty().bind(shutdownCheckBox.selectedProperty());
+    Arrays.asList(resetButton, normalizeButton, durationLabel, durationHBox).forEach(item -> {
+      item.visibleProperty().bind(shutdownCheckBox.selectedProperty());
+    });
 
     batPaths.addListener((ListChangeListener<String>) change -> {
       long totalMillis = 0;
+      totalJob = 0;
       for (String batPath: batPaths) {
         File batFile = new File(batPath);
         try {
           List<String> cmdList = Files.readAllLines(batFile.toPath());
           for (String cmd: cmdList) {
             if (cmd.startsWith("@ffmpeg")) {
+              totalJob++;
               List<String> startEnd = timeStrings(cmd);
               Duration duration = Duration.between(
                 LocalTime.parse(startEnd.get(0), formatter), 
@@ -411,6 +402,48 @@ public class BatController {
         }
       }
       preferences.put("lastUsedDir", selectedBat.getLast().getParent());
+    }
+  }
+
+  @FXML
+  private void moveUp() {
+    ObservableList<Integer> selectedIndices = batFileListView.getSelectionModel().getSelectedIndices();
+    if (selectedIndices.isEmpty()) return;
+
+    ObservableList<Integer> indicesCopy = FXCollections.observableArrayList(selectedIndices);
+    FXCollections.sort(indicesCopy); // ascending
+
+    // If any selected item is at the top, do nothing
+    if (indicesCopy.get(0) == 0) return;
+
+    for (int index : indicesCopy) {
+      String current = batPaths.get(index);
+      batPaths.set(index, batPaths.get(index - 1));
+      batPaths.set(index - 1, current);
+
+      batFileListView.getSelectionModel().clearSelection(index);
+      batFileListView.getSelectionModel().select(index - 1);
+    }
+  }
+
+  @FXML
+  private void moveDown() {
+    ObservableList<Integer> selectedIndices = batFileListView.getSelectionModel().getSelectedIndices();
+    if (selectedIndices.isEmpty()) return;
+
+    ObservableList<Integer> indicesCopy = FXCollections.observableArrayList(selectedIndices);
+    FXCollections.sort(indicesCopy, (a, b) -> b - a); // descending
+
+    // If any selected item is at the bottom, do nothing
+    if (indicesCopy.get(0) == batPaths.size() - 1) return;
+
+    for (int index : indicesCopy) {
+      String current = batPaths.get(index);
+      batPaths.set(index, batPaths.get(index + 1));
+      batPaths.set(index + 1, current);
+
+      batFileListView.getSelectionModel().clearSelection(index);
+      batFileListView.getSelectionModel().select(index + 1);
     }
   }
 }
