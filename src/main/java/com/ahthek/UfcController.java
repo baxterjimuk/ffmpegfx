@@ -134,7 +134,7 @@ public class UfcController {
             ffmetadataWriter.newLine();
             ffmetadataWriter.write("[CHAPTER]");
             ffmetadataWriter.newLine();
-            ffmetadataWriter.write("TIMEBASE=1/10000");
+            ffmetadataWriter.write("TIMEBASE=1/1000");
             ffmetadataWriter.newLine();
             ffmetadataWriter.write("START=" + String.valueOf(totalMillis));
             ffmetadataWriter.newLine();

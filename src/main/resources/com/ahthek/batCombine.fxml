@@ -43,6 +43,16 @@
                   <Tooltip text="Remove all .bat file(s)" />
                </tooltip>
             </Button>
+            <Button fx:id="moveUpButton" mnemonicParsing="false" onAction="#moveUp">
+               <graphic>
+                  <FontIcon iconLiteral="fas-caret-up" />
+               </graphic>
+            </Button>
+            <Button fx:id="moveDownButton" mnemonicParsing="false" onAction="#moveDown">
+               <graphic>
+                  <FontIcon iconLiteral="fas-caret-down" />
+               </graphic>
+            </Button>
          </children>
       </VBox>
       <CheckBox fx:id="putInFolderCheckBox" layoutX="14.0" layoutY="245.0" mnemonicParsing="false" text="Place all resulting file into the following folder (otherwise placed in source file location)" />

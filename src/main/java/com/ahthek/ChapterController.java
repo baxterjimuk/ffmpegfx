@@ -38,6 +38,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -45,16 +46,21 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TextFormatter;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.image.Image;
 import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
+import javafx.util.StringConverter;
 
 public class ChapterController {
   Preferences preferences = Preferences.userNodeForPackage(UfcController.class);
@@ -69,17 +75,29 @@ public class ChapterController {
   private TextField timeTextField, matchTextField;
 
   @FXML
-  private Button loadButton, addNewButton, deleteButton, clearButton, generateChapterButton, moveUpButton, moveDownButton;
+  private Button loadButton, addNewButton, deleteButton, clearButton;
+  
+  @FXML
+  private Button generateChapterButton, moveUpButton, moveDownButton;
+
+  @FXML
+  private Button copyStartButton, copyEndButton, resetAllTo0Button;
 
   @FXML
   private CheckBox startAt0CheckBox;
+
+  @FXML
+  private VBox timestampVBox;
+
+  @FXML
+  private Spinner<Integer> hSpinner, mSpinner, sSpinner, msSpinner;
 
   @FXML
   private TableView<Chapter> table;
 
   @FXML
   private TableColumn<Chapter, String> startCol, endCol, titleCol;
-
+        
   public void initialize() {
     BooleanBinding blankTextFields = timeTextField.textProperty().isEmpty()
     .or(matchTextField.textProperty().isEmpty());
@@ -109,9 +127,71 @@ public class ChapterController {
     .or(Bindings.isEmpty(table.getSelectionModel().getSelectedItems())));
     moveDownButton.disableProperty().bind(Bindings.size(list).lessThan(2)
     .or(Bindings.isEmpty(table.getSelectionModel().getSelectedItems())));
+    timestampVBox.disableProperty().bind(Bindings.isEmpty(table.getSelectionModel().getSelectedItems()));
+    setSpinner(hSpinner, "%02d", 23);
+    setSpinner(mSpinner, "%02d", 59);
+    setSpinner(sSpinner, "%02d", 59);
+    setSpinner(msSpinner, "%03d", 999);
   }
 
-  DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss.SSS");
+  public void setSpinner(Spinner<Integer> spinner, String format, int maxValue) {
+    spinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, maxValue));
+    spinner.getEditor().setAlignment(Pos.CENTER_RIGHT);
+    StringConverter<Integer> converter = new StringConverter<>() {
+      @Override
+      public String toString(Integer n) {
+        return String.format(format, n);
+      }
+
+      @Override
+      public Integer fromString(String s) {
+        try {
+          return Integer.parseInt(s);
+        } catch (NumberFormatException e) {
+          return 0; // Fallback value
+        }
+      }
+    };
+    spinner.getEditor().setTextFormatter(new TextFormatter<>(converter, 0));
+    spinner.setOnScroll(event -> {
+      if (event.getDeltaY() > 0) {
+        spinner.increment();
+      } else if (event.getDeltaY() < 0) {
+        spinner.decrement();
+      }
+    });
+    spinner.focusedProperty().addListener((obs, ov, nv) -> {
+      javafx.application.Platform.runLater(() -> {
+        if (spinner.getEditor().getText().length() > 0) {
+          spinner.getEditor().selectAll();
+        }
+      });
+    });
+  }
+
+  @FXML
+  private void copyStart() {
+    list.get(table.getSelectionModel().getSelectedIndex()).setStart(
+      hSpinner.getEditor().getText() + ":" + mSpinner.getEditor().getText() + ":"
+      + sSpinner.getEditor().getText() + "." +msSpinner.getEditor().getText()
+    );
+  }
+
+  @FXML
+  private void copyEnd() {
+    list.get(table.getSelectionModel().getSelectedIndex()).setEnd(
+      hSpinner.getEditor().getText() + ":" + mSpinner.getEditor().getText() + ":"
+      + sSpinner.getEditor().getText() + "." +msSpinner.getEditor().getText()
+    );
+  }
+
+  @FXML
+  private void resetAllTo0() {
+    hSpinner.getValueFactory().setValue(0);
+    mSpinner.getValueFactory().setValue(0);
+    sSpinner.getValueFactory().setValue(0);
+    msSpinner.getValueFactory().setValue(0);
+  }
 
   public static boolean isValidTime(String timeString) {
     if (timeString.isBlank() || timeString == null) {

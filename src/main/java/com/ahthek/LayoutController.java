@@ -20,12 +20,12 @@ import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 
 public class LayoutController extends Application {
-  private boolean isDarkMode = true;
+  private boolean isDarkMode = false; // should be isLightMode
   @FXML
   private BorderPane borderPane;
 
   @FXML
-  private MenuItem edlToBat, batCombine, move, ufc, chapter;
+  private MenuItem edlToBat, batCombine, move, ufc, chapter, simple;
 
   @FXML
   private ToggleButton toggle;
@@ -37,7 +37,7 @@ public class LayoutController extends Application {
     Parent newCenter = FXMLLoader.load(getClass().getResource(fxml + ".fxml"));
     borderPane.setCenter(newCenter);
     BorderPane.setAlignment(newCenter, Pos.TOP_LEFT);
-    Arrays.asList(edlToBat, batCombine, move, ufc, chapter)
+    Arrays.asList(edlToBat, batCombine, move, ufc, chapter, simple)
     .forEach(item -> item.setDisable(item.equals(menuItem)));
   }
 
@@ -67,17 +67,22 @@ public class LayoutController extends Application {
   }
 
   @FXML
+  private void simple() throws IOException {
+    setCenter("simple", simple);
+  }
+
+  @FXML
   private void darkMode(ActionEvent event) throws IOException {
     Node sourceNode = (Node) event.getSource();
     Scene scene = sourceNode.getScene();
     if (isDarkMode) {
-        cssIcon.setIconLiteral("fas-moon");
-        scene.getStylesheets().remove("style.css");
-      } else {
-        cssIcon.setIconLiteral("fas-sun");
-        scene.getStylesheets().add("style.css");
-      }
-      isDarkMode = !isDarkMode;
+      cssIcon.setIconLiteral("fas-moon");
+      scene.getStylesheets().remove("style.css");
+    } else {
+      cssIcon.setIconLiteral("fas-sun");
+      scene.getStylesheets().add("style.css");
+    }
+    isDarkMode = !isDarkMode;
   }
 
   private static Scene scene;
@@ -85,7 +90,12 @@ public class LayoutController extends Application {
   @Override
   public void start(Stage stage) throws IOException {
     scene = new Scene(loadFXML("layout"), 640, 640);
-    scene.getStylesheets().add("style.css");
+    /*
+    To make light as default (first), in fxml, the css icon should be set to moon first.
+    The above isDarkMode boolean is set to false, and the line below is commented.
+    To default to dark mode, do the opposite for each of the 3 things.
+    */
+    // scene.getStylesheets().add("style.css");
     
     stage.setScene(scene);
     stage.setResizable(false);
