@@ -28,7 +28,7 @@
             </MenuBar>
             <ToggleButton fx:id="toggle" mnemonicParsing="false" onAction="#darkMode">
                <graphic>
-                  <FontIcon fx:id="cssIcon" iconLiteral="fas-sun" />
+                  <FontIcon fx:id="cssIcon" iconLiteral="fas-moon" />
                </graphic>
             </ToggleButton>
          </children>

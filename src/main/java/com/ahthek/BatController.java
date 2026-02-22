@@ -379,6 +379,9 @@ public class BatController {
     batFileListView.getSelectionModel().clearSelection();
   }
 
+  ExtensionFilter allFilter = new ExtensionFilter("All files", "*.*");
+  ExtensionFilter batFilter = new ExtensionFilter("Batch files", "*.bat");
+
   @FXML
   private void selectFiles(ActionEvent event) throws IOException {
     FileChooser fileChooser = new FileChooser();
@@ -388,11 +391,8 @@ public class BatController {
     }
     fileChooser.setTitle("Select .bat file(s)");
     fileChooser.setInitialDirectory(initialDir);
-    fileChooser.getExtensionFilters().addAll(
-      new ExtensionFilter("All files", "*.*"),
-      new ExtensionFilter("Batch files", "*.bat")
-    );
-    fileChooser.setSelectedExtensionFilter(new ExtensionFilter("Batch files", "*.bat"));
+    fileChooser.getExtensionFilters().addAll(allFilter, batFilter);
+    fileChooser.setSelectedExtensionFilter(batFilter);
     Stage stage = (Stage)((Node) event.getSource()).getScene().getWindow();
     List<File> selectedBat = fileChooser.showOpenMultipleDialog(stage);
     if (selectedBat != null) {
