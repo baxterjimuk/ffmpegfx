@@ -33,6 +33,7 @@ import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
@@ -51,6 +52,7 @@ import javafx.stage.Stage;
 public class SimpleController {
   // need to create a class for important ffmpeg property
   Preferences preferences = Preferences.userNodeForPackage(UfcController.class);
+  int hmax, vmax;
 
   private ObservableList<Path> videoPaths = FXCollections.observableArrayList();
   private ObservableList<String> vcodecs = FXCollections.observableArrayList(
@@ -84,6 +86,9 @@ public class SimpleController {
 
   @FXML
   private Label estimateLabel;
+
+  @FXML
+  private CheckBox skipCheckBox;
 
   @FXML
   public void initialize() {
@@ -158,15 +163,7 @@ public class SimpleController {
     videoPaths.addListener((ListChangeListener<Path>) change -> {
       List<Duration> durations = new ArrayList<>();
       videoPaths.forEach(path -> {
-        try (FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(path.toFile())) {
-          avutil.av_log_set_level(avutil.AV_LOG_QUIET);
-          grabber.start();
-          durations.add(Duration.ofMillis(grabber.getLengthInTime() / 1000)); 
-          grabber.stop();
-          grabber.close();
-        } catch (Exception e) {
-          e.printStackTrace();
-        }
+        durations.add(Duration.ofMillis((long) videoDetails(path).get(0)));
       });
       Duration totalDuration = durations.stream().reduce(Duration.ZERO, Duration::plus);
       estimateLabel.setText(String.valueOf(totalDuration.toDaysPart()) + " days "
@@ -304,28 +301,41 @@ public class SimpleController {
     }
   }
 
-  private static String getDuration(String videoPath) {
-    try (FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(videoPath)) {
+  private List<Object> videoDetails(Path path) {
+    try (FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(path.toFile())) {
+      List<Object> details = new ArrayList<>();
       avutil.av_log_set_level(avutil.AV_LOG_QUIET);
       grabber.start();
-      long duration = grabber.getLengthInTime() / 1000; // microseconds to milliseconds
+      details.add(grabber.getLengthInTime() / 1000);
+      details.add(grabber.getImageWidth());
+      details.add(grabber.getImageHeight());
+      details.add(grabber.getImageHeight() > grabber.getImageWidth() ? "v": "h");
       grabber.stop();
+      grabber.release();
       grabber.close();
-      long hours = duration / (1000 * 60 * 60);
-      long minutes = (duration / (1000 * 60)) % 60;
-      long seconds = (duration / 1000) % 60;
-      long ms = duration % 1000;
-      return String.format("%02d:%02d:%02d.%03d", hours, minutes, seconds, ms);
+      return details;
     } catch (Exception e) {
       e.printStackTrace();
-      return "00:00:00.000";
+      return List.of();
     }
+  }
+
+  private String formatDuration(List<Object> details) {
+    long duration = (long) details.get(0);
+    long hours = duration / (1000 * 60 * 60);
+    long minutes = (duration / (1000 * 60)) % 60;
+    long seconds = (duration / 1000) % 60;
+    long ms = duration % 1000;
+    return String.format("%02d:%02d:%02d.%03d", hours, minutes, seconds, ms);
   }
   
   private void createBat(String sekarang, Alert alert, Stage stage) {
+    hmax = hMaxHeightTextField.getText().isBlank() ? 0 : Integer.parseInt(hMaxHeightTextField.getText());
+    vmax = vMaxHeightTextField.getText().isBlank() ? 0 : Integer.parseInt(vMaxHeightTextField.getText());
+
     String numberFormat = "%0" + String.valueOf(videoPaths.size()).length() + "d";
     String vcodec = switch(vcodecComboBox.getValue()) {
-      case "H.265" -> "-c:v libx265";
+      case "H.265" -> "-c:v libx265 -x265-params log-level=warning";
       case "H.264" -> "-c:v libx264";
       case "Copy" -> "-c:v copy";
       default -> "-vn";
@@ -361,6 +371,20 @@ public class SimpleController {
           writer.println("echo Assuming 1s is used to process 1s of video, the whole process will take"
           + " ~ " + estimateLabel.getText() + " to complete starting from the time above.");
           for (int i = 0; i < videoPaths.size(); i++) {
+            List<Object> details = videoDetails(videoPaths.get(i));
+            String scaleVF = "";
+            if (details.get(3).equals("h")) {
+              if (hmax > 0 && hmax < ((int) details.get(2))) {
+                scaleVF = "-vf \"scale=-2:" + hmax + "\" ";
+              }
+            } else {
+              if (vmax > 0 && vmax < ((int) details.get(2))) {
+                scaleVF = "-vf \"scale=-2:" + vmax + "\" ";
+              }
+            }
+            if (scaleVF.equals("") && skipCheckBox.isSelected()) {
+              continue;
+            }
             String in = videoPaths.get(i).toString();
             Path parent = videoPaths.get(i).getParent();
             String base = FilenameUtils.getBaseName(in);
@@ -368,10 +392,10 @@ public class SimpleController {
             writer.println("echo.");
             writer.println("cd /d \"" + parent.toString() + "\"");
             writer.println("echo (" + String.format(numberFormat, i + 1) + "/" + videoPaths.size() 
-              + ") [" + getDuration(in) + "] " + FilenameUtils.getName(in)
+              + ") [" + formatDuration(details) + "] " + FilenameUtils.getName(in)
             );
             writer.println("ffmpeg -y -hide_banner -loglevel warning -stats -i \""
-              + FilenameUtils.getName(in) + "\" " + vcodec + " " + acodec + " \"" + out + "\""
+              + FilenameUtils.getName(in) + "\" " + scaleVF + vcodec + " " + acodec + " \"" + out + "\""
             );
           }
           writer.println("echo.");
