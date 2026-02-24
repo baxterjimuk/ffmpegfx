@@ -22,6 +22,7 @@
                         <MenuItem fx:id="ufc" mnemonicParsing="false" onAction="#ufc" text="UFC" />
                         <MenuItem fx:id="chapter" mnemonicParsing="false" onAction="#chapter" text="Chapter" />
                         <MenuItem fx:id="simple" mnemonicParsing="false" onAction="#simple" text="Simple" />
+                        <MenuItem fx:id="robocopy" mnemonicParsing="false" onAction="#robocopy" text="Robocopy" />
                   </items>
                 </Menu>
               </menus>
