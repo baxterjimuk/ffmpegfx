@@ -25,7 +25,7 @@ public class LayoutController extends Application {
   private BorderPane borderPane;
 
   @FXML
-  private MenuItem edlToBat, batCombine, move, ufc, chapter, simple;
+  private MenuItem edlToBat, batCombine, move, ufc, chapter, simple, robocopy;
 
   @FXML
   private ToggleButton toggle;
@@ -37,7 +37,7 @@ public class LayoutController extends Application {
     Parent newCenter = FXMLLoader.load(getClass().getResource(fxml + ".fxml"));
     borderPane.setCenter(newCenter);
     BorderPane.setAlignment(newCenter, Pos.TOP_LEFT);
-    Arrays.asList(edlToBat, batCombine, move, ufc, chapter, simple)
+    Arrays.asList(edlToBat, batCombine, move, ufc, chapter, simple, robocopy)
     .forEach(item -> item.setDisable(item.equals(menuItem)));
   }
 
@@ -69,6 +69,11 @@ public class LayoutController extends Application {
   @FXML
   private void simple() throws IOException {
     setCenter("simple", simple);
+  }
+
+  @FXML
+  private void robocopy() throws IOException {
+    setCenter("robocopy", robocopy);
   }
 
   @FXML
