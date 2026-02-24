@@ -29,12 +29,14 @@ import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionMode;
@@ -71,6 +73,7 @@ public class SimpleController {
     "*.mkv", "*.mp4", "*.mov", "*.m4v", "*.avi"
   );
   ExtensionFilter batFilter = new ExtensionFilter("Batch files", "*.bat");
+  ExtensionFilter edlFilter = new ExtensionFilter("EDL files", "*.edl");
 
   @FXML
   private ListView<Path> inputListView;
@@ -88,7 +91,10 @@ public class SimpleController {
   private Label estimateLabel;
 
   @FXML
-  private CheckBox skipCheckBox;
+  private CheckBox skipCheckBox, trimCheckBox;
+
+  @FXML
+  private Hyperlink edlLink;
 
   @FXML
   public void initialize() {
@@ -156,8 +162,10 @@ public class SimpleController {
     });
 
     startButton.disableProperty().bind(Bindings.isEmpty(videoPaths)
-    .or(Bindings.size(videoPaths).lessThan(2)
-    .and(Bindings.equal(0, actionComboBox.getSelectionModel().selectedIndexProperty())))
+      .or(Bindings.size(videoPaths).lessThan(2)
+        .and(Bindings.equal(0, actionComboBox.getSelectionModel().selectedIndexProperty())))
+      .or(trimCheckBox.selectedProperty()
+        .and(edlLink.textProperty().isEqualTo("Select .edl file")))
     );
 
     videoPaths.addListener((ListChangeListener<Path>) change -> {
@@ -175,6 +183,30 @@ public class SimpleController {
         estimateLabel.setText(null);
       }
     });
+
+    trimCheckBox.disableProperty().bind(Bindings.size(videoPaths).isNotEqualTo(1));
+    edlLink.disableProperty().bind(trimCheckBox.selectedProperty().not()
+      .or(Bindings.size(videoPaths).isNotEqualTo(1))
+    );
+  }
+
+  @FXML
+  private void selectEdl(ActionEvent event) {
+    FileChooser fileChooser = new FileChooser();
+    File initialDir = new File(preferences.get("lastUsedDir", System.getProperty("user.home")));
+    if (!initialDir.exists()) {
+      initialDir = new File(System.getProperty("user.home"));
+    }
+    fileChooser.setTitle("Select .edl file");
+    fileChooser.setInitialDirectory(initialDir);
+    fileChooser.getExtensionFilters().addAll(allFilter, edlFilter);
+    fileChooser.setSelectedExtensionFilter(edlFilter);
+    Stage stage = (Stage)((Node) event.getSource()).getScene().getWindow();
+    File selectedFile = fileChooser.showOpenDialog(stage);
+    if (selectedFile != null) {
+      edlLink.setText(selectedFile.getAbsolutePath());
+      preferences.put("lastUsedDir", selectedFile.getParent());
+    }
   }
 
   public static boolean isValidPath(String path) {
@@ -382,9 +414,14 @@ public class SimpleController {
                 scaleVF = "-vf \"scale=-2:" + vmax + "\" ";
               }
             }
-            if (scaleVF.equals("") && skipCheckBox.isSelected()) {
+
+            // when what you want to do is select a couple of videos and scale down those
+            // that exceed a certain height, you'd want to skip those that aren't exceeding
+            // that height to save time
+            if (scaleVF.equals("") && skipCheckBox.isSelected() && !trimCheckBox.isSelected()) {
               continue;
             }
+
             String in = videoPaths.get(i).toString();
             Path parent = videoPaths.get(i).getParent();
             String base = FilenameUtils.getBaseName(in);
@@ -394,6 +431,27 @@ public class SimpleController {
             writer.println("echo (" + String.format(numberFormat, i + 1) + "/" + videoPaths.size() 
               + ") [" + formatDuration(details) + "] " + FilenameUtils.getName(in)
             );
+
+            // when you can reach here, it means you can press the START button, which means you
+            // already selected an .edl file
+            if (videoPaths.size() == 1 && trimCheckBox.isSelected() && !trimCheckBox.isDisabled()) {
+              List<String> timeList = Files.readAllLines(Paths.get(edlLink.getText()));
+              for (int j = 0; j < timeList.size(); j++) {
+                String[] timestamp = timeList.get(j).replace(",", ".").split("\t");
+                StringBuilder sb = new StringBuilder();
+                sb.append("ffmpeg -y -hide_banner -loglevel warning -stats ");
+                sb.append("-ss " + timestamp[0] + " -to " + timestamp[1] + " -i \"");
+                sb.append(FilenameUtils.getName(in) + "\" ");
+                if (!scaleVF.equals("")) {
+                  sb.append(scaleVF);
+                }
+                sb.append(vcodec + " " + acodec + " \"" + sekarang + "_" + base + "_");
+                sb.append(String.format("%02d", j + 1) + "." + containerComboBox.getValue() + "\"");
+                writer.println(sb.toString());
+              }
+              break;
+            }
+
             writer.println("ffmpeg -y -hide_banner -loglevel warning -stats -i \""
               + FilenameUtils.getName(in) + "\" " + scaleVF + vcodec + " " + acodec + " \"" + out + "\""
             );
@@ -415,7 +473,6 @@ public class SimpleController {
         }
       }
     }
-    
   }
 
   @FXML
