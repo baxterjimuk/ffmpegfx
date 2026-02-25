@@ -29,6 +29,7 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.RadioButton;
+import javafx.scene.control.SelectionMode;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TextArea;
@@ -75,6 +76,10 @@ public class CopyController {
   @FXML
   public void initialize() {
     sourceListView.setItems(sourcePaths);
+    sourceListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+
+    removeButton.disableProperty().bind(Bindings.isEmpty(sourceListView.getSelectionModel().getSelectedItems()));
+    clearButton.disableProperty().bind(Bindings.isEmpty(sourcePaths));
 
     startButton.disableProperty().bind(Bindings.isEmpty(sourcePaths)
       .or(destinationTextField.textProperty().isEmpty())
