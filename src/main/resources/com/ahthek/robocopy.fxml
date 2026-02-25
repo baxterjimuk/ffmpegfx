@@ -46,7 +46,7 @@
                   <FontIcon iconLiteral="fas-plus" />
                </graphic>
                <tooltip>
-                  <Tooltip text="Add a file" />
+                  <Tooltip text="Add file(s)" />
                </tooltip>
             </Button>
             <Button fx:id="sourceFolderButton" mnemonicParsing="false" onAction="#addSourceFolder">
@@ -92,14 +92,12 @@
       <Label text="Destination" underline="true" GridPane.rowIndex="2" />
       <HBox alignment="CENTER_LEFT" spacing="20.0" GridPane.columnSpan="2147483647" GridPane.rowIndex="4">
          <children>
-            <RadioButton fx:id="moveRadioButton" mnemonicParsing="false" text="Move">
+            <RadioButton fx:id="roboMoveRadioButton" mnemonicParsing="false" text="Robo-Move">
                <toggleGroup>
                   <ToggleGroup fx:id="actionGroup" />
-               </toggleGroup>
-            </RadioButton>
-            <RadioButton fx:id="copyRadioButton" mnemonicParsing="false" text="Copy" toggleGroup="$actionGroup" />
-            <RadioButton fx:id="roboMoveRadioButton" mnemonicParsing="false" text="Robo-Move" toggleGroup="$actionGroup" />
+               </toggleGroup></RadioButton>
             <RadioButton fx:id="roboCopyRadioButton" mnemonicParsing="false" selected="true" text="Robo-Copy" toggleGroup="$actionGroup" />
+            <CheckBox fx:id="directoryCheckBox" mnemonicParsing="false" text="Treat directory as itself instead of everything within it" />
          </children>
       </HBox>
       <HBox alignment="CENTER_LEFT" GridPane.rowIndex="6">
